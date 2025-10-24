@@ -33,7 +33,7 @@
   }
 </script>
 
-<div class="flex flex-col md:flex-row gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+<div class="flex flex-col md:flex-row gap-4 p-4 bg-primary-50 dark:bg-primary-900 dark:bg-gray-800 rounded-lg">
   <!-- Judul (Title) Input -->
   <div class="flex-1">
     <Label for="judul" class="mb-2">Judul Buku</Label>

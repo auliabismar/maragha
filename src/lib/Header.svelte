@@ -10,11 +10,15 @@
     Dropdown,
     DropdownItem,
     DropdownHeader,
-    DropdownDivider
+    DropdownDivider,
+    Tooltip,
+    Hr,
+    P
   } from "flowbite-svelte";
   import { UserGraduateOutline } from "flowbite-svelte-icons";
   import { currentUser, pb } from "$lib/pocketbase";
   import { navigate } from "sv-router/generated";
+  import { canAccessMejaKerja } from '$lib/auth';
 
   function logout() {
     pb.authStore.clear();
@@ -28,7 +32,20 @@
     }
     return null;
   }
+  function getRoleClasses(role: string) {
+    switch (role) {
+      case 'Editor':
+        return 'bg-purple-600 text-purple-400';
+      case 'Penerjemah':
+        return 'bg-blue-600 text-blue-400';
+      case 'Tamu':
+        return 'bg-gray-600 text-gray-400';
+      default:
+        return 'bg-stone-600 text-stone-400';
+    }
+  }
 </script>
+
 <header class="bg-secondary-100 dark:bg-secondary-900">
   <Navbar>
     <NavBrand href="/">
@@ -38,12 +55,17 @@
     <div class="flex items-center lg:order-2">
       {#if $currentUser}
         {#if $currentUser.avatar}
-          <Avatar src={getAvatarUrl()} id="user-drop" />
+        <Avatar border src={getAvatarUrl()} id="user-drop" class="{getRoleClasses($currentUser?.role)}"/>
         {:else}
-          <Avatar id="user-drop" class="text-primary-900 bg-primary-100 dark:bg-primary-800 dark:text-primary-100">
-            <UserGraduateOutline color="stroke-secondary-900"/>
-          </Avatar>
+        <Avatar border id="user-drop" class="{getRoleClasses($currentUser?.role)} text-primary-900 bg-primary-100 dark:bg-primary-800 dark:text-primary-100">
+          <UserGraduateOutline color="stroke-secondary-900"/>
+        </Avatar>
         {/if}
+        <Tooltip>
+          <P align='center' class='text-gray-100'>{$currentUser?.name}</P>
+          <Hr class="m-1 h-px w-48 rounded-sm" />
+          <P align='center' class='text-gray-100'>{$currentUser?.email}</P>
+        </Tooltip>
         <Dropdown triggeredBy="#user-drop">
           <DropdownHeader>
             <span class="block text-sm">{$currentUser.name || 'User'}</span>
@@ -59,13 +81,5 @@
       {/if}
       <NavHamburger />
     </div>
-    <NavUl>
-      <NavLi href="/">Home</NavLi>
-      <NavLi href="/">Company</NavLi>
-      <NavLi href="/">Marketplace</NavLi>
-      <NavLi href="/">Features</NavLi>
-      <NavLi href="/">Team</NavLi>
-      <NavLi href="/">Contact</NavLi>
-    </NavUl>
   </Navbar>
 </header>

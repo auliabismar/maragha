@@ -47,9 +47,6 @@
               <div class="flex items-center h-5">
                 <Checkbox name="remember" id="remember">Remember me</Checkbox>
               </div>
-              <div class="ml-3 text-sm">
-                <Label for="remember" class="text-gray-500 dark:text-gray-300">Remember me</Label>
-              </div>
             </div>
             <a href="/auth/reset" class="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500">Forgot password?</a>
           </div>

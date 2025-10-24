@@ -4,6 +4,7 @@
   import BookCard from '$lib/BookCard.svelte';
   import { Spinner, Alert } from 'flowbite-svelte';
   import { InfoCircleOutline } from 'flowbite-svelte-icons';
+  import Hero from '$lib/Hero.svelte';
 
   // Svelte 5 State Runes
   let books = $state([]);
@@ -116,6 +117,7 @@
   }); // <-- The dependency array is removed
 </script>
 
+<Hero />
 <div class="container mx-auto px-4 py-8">
   <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">
     Katalog Buku
