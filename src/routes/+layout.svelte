@@ -49,7 +49,7 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<link rel="icon" href="/src/lib/assets/logo.svg" />
 </svelte:head>
 
 <div class="min-h-screen bg-background">
@@ -57,7 +57,10 @@
 	<header class="bg-primary text-primary-foreground shadow-lg">
 		<div class="container mx-auto px-6 py-4">
 			<div class="flex items-center justify-between">
-				<h1 class="text-3xl font-heading font-bold">Maragha</h1>
+				<a href="/" class="flex items-center space-x-2">
+					<img src="/src/lib/assets/logo.svg" alt="Maragha Logo" class="h-8 w-8" />
+					<h1 class="text-3xl font-heading font-bold">Maragha</h1>
+				</a>
 				<nav class="hidden md:flex space-x-6 items-center">
 					<a href="/" class="hover:text-accent transition-colors">Beranda</a>
 					<a href="/dashboard" class="hover:text-accent transition-colors">Dashboard</a>
@@ -91,7 +94,7 @@
 	<!-- Footer -->
 	<footer class="bg-primary text-primary-foreground py-8 mt-16">
 		<div class="container mx-auto px-6 text-center">
-			<p>&copy; 2025 Maragha. Perpustakaan Digital.</p>
+			<p>&copy; 2025 Maragha. Made with ❤️ by <a href="https://almagazi.id">al-Magazi</a>.</p>
 		</div>
 	</footer>
 </div>

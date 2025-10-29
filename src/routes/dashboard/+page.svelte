@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import pb from '$lib/pocketbase';
 	import { goto } from '$app/navigation';
+	import pb from '$lib/pocketbase';
 
 	interface Book {
 		id: string;
@@ -123,7 +123,10 @@
 	{#if filteredBooks.length > 0}
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 			{#each filteredBooks as book}
-				<div class="bg-card rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+				<button
+					class="bg-card rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow text-left w-full"
+					onclick={() => goto(`/buku/${book.id}/halaman`)}
+				>
 					<div class="aspect-[5/7] bg-muted flex items-center justify-center">
 						{#if book.cover}
 							<img src={book.cover} alt={book.judul} class="w-full h-full object-cover" />
@@ -170,12 +173,12 @@
 									Tidak ada kategori
 								</span>
 							{/if}
-							<button class="text-primary hover:text-accent text-sm font-medium">
-								Lihat Detail
-							</button>
+							<span class="text-primary text-sm font-medium">
+								Baca →
+							</span>
 						</div>
 					</div>
-				</div>
+				</button>
 			{/each}
 		</div>
 	{:else}
