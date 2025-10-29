@@ -61,7 +61,9 @@
 				<nav class="hidden md:flex space-x-6 items-center">
 					<a href="/" class="hover:text-accent transition-colors">Beranda</a>
 					<a href="/dashboard" class="hover:text-accent transition-colors">Dashboard</a>
-					<a href="/penugasan" class="hover:text-accent transition-colors">Penugasan</a>
+					{#if user && (user.akses === 'Editor' || user.akses === 'Penerjemah')}
+						<a href="/penugasan" class="hover:text-accent transition-colors">Penugasan</a>
+					{/if}
 					{#if user}
 						<button onclick={goToProfile} class="flex items-center space-x-2 hover:text-accent transition-colors">
 							{#if avatarUrl}

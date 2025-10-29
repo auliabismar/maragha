@@ -22,7 +22,13 @@
 		if (!pb.authStore.isValid) {
 			goto('/login');
 		} else {
-			userEmail = pb.authStore.model?.email;
+			const user = pb.authStore.model;
+			if (!user || (user.akses !== 'Editor' && user.akses !== 'Penerjemah')) {
+				// Redirect to dashboard if user doesn't have proper role
+				goto('/dashboard');
+				return;
+			}
+			userEmail = user.email;
 			fetchAssignments();
 		}
 	});

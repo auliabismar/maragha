@@ -10,13 +10,15 @@
 		status: string;
 		penulis: string[];
 		penerbit: string;
+		kategori: string[];
 	}
 
 	let books = $state<Book[]>([]);
 	let filteredBooks = $state<Book[]>([]);
-	let selectedStatus = $state<string>('all');
+	let selectedKategori = $state<string>('all');
 	let searchQuery = $state<string>('');
 	let userEmail = $state<string | null>(null);
+	let availableKategoris = $state<string[]>([]);
 
 	onMount(() => {
 		if (!pb.authStore.isValid) {
@@ -38,11 +40,20 @@
 			books = records.map(record => ({
 				id: record.id,
 				judul: record.judul,
-				cover: record.cover ? pb.files.getUrl(record, record.cover) : undefined,
+				cover: record.cover ? pb.files.getURL(record, record.cover) : undefined,
 				status: record.status,
-				penulis: record.expand?.penulis?.map((p: any) => p.nama) || [],
-				penerbit: record.expand?.penerbit?.nama || 'N/A'
+				penulis: record.expand?.penulis?.map((p: any) => p.id) || [],
+				penerbit: record.expand?.penerbit?.id || 'N/A',
+				kategori: record.expand?.kategori?.map((k: any) => k.id) || []
 			}));
+
+			// Extract unique kategoris
+			const kategoriSet = new Set<string>();
+			books.forEach(book => {
+				book.kategori.forEach(k => kategoriSet.add(k));
+			});
+			availableKategoris = Array.from(kategoriSet).sort();
+
 			filterBooks();
 		} catch (error) {
 			console.error('Error fetching books:', error);
@@ -51,10 +62,11 @@
 
 	function filterBooks() {
 		filteredBooks = books.filter(book => {
-			const matchesStatus = selectedStatus === 'all' || book.status === selectedStatus;
+			const matchesKategori = selectedKategori === 'all' || book.kategori.includes(selectedKategori);
 			const matchesSearch = book.judul.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				book.penulis.some(p => p.toLowerCase().includes(searchQuery.toLowerCase()));
-			return matchesStatus && matchesSearch;
+				book.penulis.some(p => p.toLowerCase().includes(searchQuery.toLowerCase())) ||
+				book.kategori.some(k => k.toLowerCase().includes(searchQuery.toLowerCase()));
+			return matchesKategori && matchesSearch;
 		});
 	}
 
@@ -83,24 +95,24 @@
 		<div class="w-full md:w-1/2">
 			<input
 				type="text"
-				placeholder="Cari buku atau penulis..."
+				placeholder="Cari buku, penulis, atau kategori..."
 				bind:value={searchQuery}
 				oninput={filterBooks}
 				class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
 			/>
 		</div>
 
-		<!-- Status Filter -->
+		<!-- Kategori Filter -->
 		<div class="w-full md:w-auto">
 			<select
-				bind:value={selectedStatus}
+				bind:value={selectedKategori}
 				onchange={filterBooks}
 				class="w-full md:w-auto px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
 			>
-				<option value="all">Semua Status</option>
-				<option value="Draft">Draft</option>
-				<option value="Terbit">Terbit</option>
-				<option value="Batal">Batal</option>
+				<option value="all">Semua Kategori</option>
+				{#each availableKategoris as kategori}
+					<option value={kategori}>{kategori}</option>
+				{/each}
 			</select>
 		</div>
 	</div>
@@ -131,16 +143,33 @@
 						<p class="text-sm text-muted-foreground mb-1">
 							Penulis: {book.penulis.join(', ')}
 						</p>
+						{#if book.kategori.length > 0}
+							<p class="text-sm text-muted-foreground mb-1">
+								Kategori: {book.kategori.join(', ')}
+							</p>
+						{/if}
 						<p class="text-sm text-muted-foreground mb-3">
 							Penerbit: {book.penerbit}
 						</p>
 						<div class="flex items-center justify-between">
-							<span class="px-2 py-1 text-xs rounded-full
-								{book.status === 'Terbit' ? 'bg-green-100 text-green-800' :
-								 book.status === 'Draft' ? 'bg-yellow-100 text-yellow-800' :
-								 'bg-red-100 text-red-800'}">
-								{book.status}
-							</span>
+							{#if book.kategori.length > 0}
+								<div class="flex flex-wrap gap-1">
+									{#each book.kategori.slice(0, 2) as kategori}
+										<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+											{kategori}
+										</span>
+									{/each}
+									{#if book.kategori.length > 2}
+										<span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">
+											+{book.kategori.length - 2}
+										</span>
+									{/if}
+								</div>
+							{:else}
+								<span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">
+									Tidak ada kategori
+								</span>
+							{/if}
 							<button class="text-primary hover:text-accent text-sm font-medium">
 								Lihat Detail
 							</button>
