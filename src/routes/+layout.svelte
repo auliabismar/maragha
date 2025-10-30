@@ -63,7 +63,9 @@
 				</a>
 				<nav class="hidden md:flex space-x-6 items-center">
 					<a href="/" class="hover:text-accent transition-colors">Beranda</a>
-					<a href="/dashboard" class="hover:text-accent transition-colors">Dashboard</a>
+					{#if user}
+						<a href="/lemari" class="hover:text-accent transition-colors">Lemari Buku</a>
+					{/if}
 					{#if user && (user.akses === 'Editor' || user.akses === 'Penerjemah')}
 						<a href="/penugasan" class="hover:text-accent transition-colors">Penugasan</a>
 					{/if}

@@ -28,6 +28,7 @@
 	let itemsPerPage = $state(1); // Fixed to 1 record per screen
 	let totalPages = $state(1);
 	let loading = $state(true);
+	let lemariRecord = $state<any>(null);
 
 	// Get book ID from route params
 	const bookId = $derived($page.params.id);
@@ -43,7 +44,7 @@
 			return;
 		}
 
-		await Promise.all([fetchBook(), fetchHalaman()]);
+		await Promise.all([fetchBook(), fetchHalaman(), syncWithBookshelf()]);
 		loading = false;
 
 		// Add keyboard navigation for pagination
@@ -122,9 +123,54 @@
 		}
 	}
 
+	async function syncWithBookshelf() {
+		if (!pb.authStore.model) {
+			console.error('User not authenticated');
+			return;
+		}
+		try {
+			const records = await pb.collection('lemari_buku').getList(1, 1, {
+				filter: `pengguna = "${pb.authStore.model.id}" && buku = "${bookId}"`
+			});
+
+			if (records.items.length > 0) {
+				lemariRecord = records.items[0];
+				currentPage = lemariRecord.halaman;
+			} else {
+				const newRecord = await pb.collection('lemari_buku').create({
+					pengguna: pb.authStore.model.id,
+					buku: bookId,
+					halaman: 1
+				});
+				lemariRecord = newRecord;
+				currentPage = 1;
+			}
+
+			// Fetch halaman for the updated currentPage
+			fetchHalaman();
+		} catch (error) {
+			console.error('Error syncing with bookshelf:', error);
+		}
+	}
+
+	async function updateBookshelfPage(page: number) {
+		if (!lemariRecord) {
+			return;
+		}
+
+		try {
+			await pb.collection('lemari_buku').update(lemariRecord.id, {
+				halaman: page
+			});
+		} catch (error) {
+			console.error('Error updating bookshelf page:', error);
+		}
+	}
+
 	function goToPage(page: number) {
 		if (page >= 1 && page <= totalPages) {
 			currentPage = page;
+			updateBookshelfPage(page); // Track page in bookshelf
 			fetchHalaman();
 			// Scroll to top of page
 			window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -380,7 +426,7 @@
 							aria-label="Halaman pertama"
 							class="px-3 py-2 text-sm font-medium text-muted-foreground bg-card border border-border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
-							&lt;&lt;
+							{'<<'}
 						</button>
 
 						<!-- Previous Page Button -->
@@ -390,7 +436,7 @@
 							aria-label="Halaman sebelumnya"
 							class="px-3 py-2 text-sm font-medium text-muted-foreground bg-card border border-border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
-							&lt;
+							{'<'}
 						</button>
 
 						<!-- Page Numbers -->
@@ -417,7 +463,7 @@
 							aria-label="Halaman berikutnya"
 							class="px-3 py-2 text-sm font-medium text-muted-foreground bg-card border border-border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
-							&gt;
+							{'>'}
 						</button>
 
 						<!-- Last Page Button -->
@@ -427,7 +473,7 @@
 							aria-label="Halaman terakhir"
 							class="px-3 py-2 text-sm font-medium text-muted-foreground bg-card border border-border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
-							&gt;&gt;
+							{'>'}
 						</button>
 					</nav>
 				</div>
