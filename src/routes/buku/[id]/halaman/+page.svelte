@@ -196,40 +196,31 @@
 			pages.push(i);
 		}
 		
-		// Add last page if not visible
-		if (end < totalPages) {
-			if (end < totalPages - 1) {
+		// Add last 10 multiples of 10 and highest page numbers
+		if (totalPages > 10) {
+			// Add ellipsis before high numbers if needed
+			const highestNumbersStart = Math.max(end + 1, totalPages - 19);
+			if (highestNumbersStart > end + 1) {
 				pages.push('...');
 			}
-			pages.push(totalPages);
-		}
-		
-		// Add multiples of 10
-		const multiplesOf10: number[] = [];
-		for (let i = 10; i < totalPages; i += 10) {
-			if (i > start && i < end) continue; // Skip if already shown
-			if (i > 1 && i < totalPages) { // Don't add 1 or totalPages again
-				multiplesOf10.push(i);
-			}
-		}
-		
-		// Insert multiples of 10 in appropriate positions
-		for (const multiple of multiplesOf10) {
-			if (!pages.includes(multiple)) {
-				const insertIndex = pages.findIndex(p => typeof p === 'number' && p > multiple);
-				if (insertIndex === -1) {
-					pages.push(multiple);
-				} else {
-					pages.splice(insertIndex, 0, multiple);
+			
+			// Add highest numbers (last 10 pages)
+			const highestNumbers: number[] = [];
+			for (let i = Math.max(totalPages - 9, totalPages - 9); i < totalPages; i++) {
+				if (i > end && i !== totalPages) {
+					highestNumbers.push(i);
 				}
 			}
 		}
 		
-		return pages.sort((a, b) => {
-			if (a === '...') return -1;
-			if (b === '...') return 1;
-			return (a as number) - (b as number);
-		});
+		// Add last page if not visible
+		if (end < totalPages) {
+			if (!pages.includes(totalPages)) {
+				pages.push(totalPages);
+			}
+		}
+		
+		return pages;
 	}
 
 	function goBack() {
