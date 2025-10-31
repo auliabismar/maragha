@@ -50,7 +50,7 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href="/src/lib/assets/logo.svg" />
+	<link rel="icon" href="/logo.svg" />
 </svelte:head>
 
 <div class="min-h-screen bg-background">
@@ -59,7 +59,7 @@
 		<div class="container mx-auto px-6 py-4">
 			<div class="flex items-center justify-between">
 				<a href="/" class="flex items-center space-x-2">
-					<img src="/src/lib/assets/logo.svg" alt="Maragha Logo" class="h-8 w-8" />
+					<img src="/logo.svg" alt="Maragha Logo" class="h-8 w-8" />
 					<h1 class="text-3xl font-heading font-bold">Maragha</h1>
 				</a>
 				<nav class="hidden md:flex space-x-6 items-center">

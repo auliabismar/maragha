@@ -43,7 +43,7 @@
 <div class="flex items-center justify-center min-h-screen">
 	<div class="w-full max-w-md p-8 space-y-6 bg-card rounded-lg shadow-lg">
 		<div class="flex justify-center">
-			<img src="/src/lib/assets/logo.svg" alt="Maragha Logo" class="h-16 w-16" />
+			<img src="/logo.svg" alt="Maragha Logo" class="h-16 w-16" />
 		</div>
 		<h2 class="text-3xl font-heading font-bold text-center text-foreground">Daftar</h2>
 		<form onsubmit={(e) => { e.preventDefault(); handleRegister(); }} class="space-y-4">
