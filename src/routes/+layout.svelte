@@ -4,6 +4,7 @@
 	import pb from '$lib/pocketbase';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { Toaster } from 'svelte-sonner';
 
 	let { children } = $props();
 	let user = $state<any | null>(null);
@@ -66,7 +67,7 @@
 					{#if user}
 						<a href="/lemari" class="hover:text-accent transition-colors">Lemari Buku</a>
 					{/if}
-					{#if user && (user.akses === 'Editor' || user.akses === 'Penerjemah')}
+					{#if user && (user.role === 'Editor' || user.role === 'Penerjemah')}
 						<a href="/penugasan" class="hover:text-accent transition-colors">Penugasan</a>
 					{/if}
 					{#if user}
@@ -92,6 +93,7 @@
 	<main class="container mx-auto px-6 py-8">
 		{@render children?.()}
 	</main>
+	<Toaster />
 
 	<!-- Footer -->
 	<footer class="bg-primary text-primary-foreground py-8 mt-16">

@@ -3,6 +3,8 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import pb from '$lib/pocketbase';
+import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui';
+import { toast } from 'svelte-sonner';
 
 	interface Book {
 		id: string;
@@ -25,12 +27,24 @@
 	let book = $state<Book | null>(null);
 	let halamanRecords = $state<Halaman[]>([]);
 	let currentPage = $state(1);
-	let itemsPerPage = $state(1); // Fixed to 1 record per screen
+	let itemsPerPage = $state(1);
 	let totalPages = $state(1);
 	let loading = $state(true);
 	let lemariRecord = $state<any>(null);
 	let jumpPageInput = $state('');
 	let showImages = $state<boolean>(true);
+
+	// Translation suggestion dialog state
+	let showSuggestionDialog = $state(false);
+	let selectedText = $state('');
+	let terjemahanBaru = $state('');
+	let alasanKeterangan = $state('');
+	let selectedHalamanId = $state<string>('');
+	let selectedHalamanNo = $state<number>(0);
+	let cleanup: (() => void) | undefined;
+
+	// AbortController for fetchHalaman requests
+	let abortController: AbortController | null = null;
 
 	// Get book ID from route params
 	const bookId = $derived($page.params.id);
@@ -52,6 +66,12 @@
 
 		// Add keyboard navigation for pagination
 		function handleKeydown(event: KeyboardEvent) {
+			if (event.key === 'Escape' && showSuggestionDialog) {
+				event.preventDefault();
+				closeSuggestionDialog();
+				return;
+			}
+
 			// Only handle arrow keys when not in an input field
 			if (event.target instanceof HTMLInputElement ||
 				event.target instanceof HTMLTextAreaElement ||
@@ -76,6 +96,7 @@
 		// Store cleanup function
 		cleanup = () => {
 			document.removeEventListener('keydown', handleKeydown);
+			abortController?.abort();
 		};
 	});
 
@@ -114,12 +135,19 @@
 
 	async function fetchHalaman() {
 		if (!bookId) return;
+
+		// Abort previous request if any
+		if (abortController) {
+			abortController.abort();
+		}
+		abortController = new AbortController();
 		
 		try {
 			const records = await pb.collection('halaman').getList(currentPage, itemsPerPage, {
 				filter: `buku = "${bookId}"`,
 				sort: 'halaman',
-				expand: 'buku'
+				expand: 'buku',
+				signal: abortController.signal
 			});
 
 			halamanRecords = records.items.map(record => ({
@@ -131,7 +159,10 @@
 			}));
 
 			totalPages = Math.ceil(records.totalItems / itemsPerPage);
-		} catch (error) {
+		} catch (error: any) {
+			if (error.name === 'AbortError') {
+				return;
+			}
 			console.error('Error fetching halaman:', error);
 		}
 	}
@@ -159,7 +190,6 @@
 				currentPage = 1;
 			}
 
-			// Fetch halaman for the updated currentPage
 			fetchHalaman();
 		} catch (error) {
 			console.error('Error syncing with bookshelf:', error);
@@ -183,9 +213,8 @@
 	function goToPage(page: number) {
 		if (page >= 1 && page <= totalPages) {
 			currentPage = page;
-			updateBookshelfPage(page); // Track page in bookshelf
+			updateBookshelfPage(page);
 			fetchHalaman();
-			// Scroll to top of page
 			window.scrollTo({ top: 0, behavior: 'smooth' });
 		}
 	}
@@ -193,12 +222,10 @@
 	function jumpToPage() {
 		const pageNumber = parseInt(jumpPageInput);
 		
-		// Validate input: must be positive integer
 		if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= totalPages) {
 			goToPage(pageNumber);
-			jumpPageInput = ''; // Clear input after successful jump
+			jumpPageInput = '';
 		}
-		// If invalid, do nothing (input will be cleared when focus is lost)
 	}
 
 	function handleJumpInputKeydown(event: KeyboardEvent) {
@@ -208,7 +235,6 @@
 	}
 
 	function handleJumpInputBlur() {
-		// Clear input when focus is lost if invalid
 		const pageNumber = parseInt(jumpPageInput);
 		if (isNaN(pageNumber) || pageNumber < 1 || pageNumber > totalPages) {
 			jumpPageInput = '';
@@ -221,7 +247,6 @@
 		const start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
 		const end = Math.min(totalPages, start + maxVisible - 1);
 		
-		// Add first page if not visible
 		if (start > 1) {
 			pages.push(1);
 			if (start > 2) {
@@ -229,20 +254,16 @@
 			}
 		}
 		
-		// Add regular page numbers
 		for (let i = start; i <= end; i++) {
 			pages.push(i);
 		}
 		
-		// Add last 10 multiples of 10 and highest page numbers
 		if (totalPages > 10) {
-			// Add ellipsis before high numbers if needed
 			const highestNumbersStart = Math.max(end + 1, totalPages - 19);
 			if (highestNumbersStart > end + 1) {
 				pages.push('...');
 			}
 			
-			// Add highest numbers (last 10 pages)
 			const highestNumbers: number[] = [];
 			for (let i = Math.max(totalPages - 9, totalPages - 9); i < totalPages; i++) {
 				if (i > end && i !== totalPages) {
@@ -251,7 +272,6 @@
 			}
 		}
 		
-		// Add last page if not visible
 		if (end < totalPages) {
 			if (!pages.includes(totalPages)) {
 				pages.push(totalPages);
@@ -265,9 +285,6 @@
 		goto('/dashboard');
 	}
 
-	// Cleanup function for event listeners
-	let cleanup: (() => void) | undefined;
-
 	function goToPreviousPage() {
 		if (currentPage > 1) {
 			goToPage(currentPage - 1);
@@ -279,6 +296,67 @@
 			goToPage(currentPage + 1);
 		}
 	}
+
+	// Text selection tracking
+	function handleTextSelection(halaman: Halaman) {
+		const selection = window.getSelection();
+		const text = selection?.toString().trim() || '';
+
+		if (text) {
+			selectedText = text;
+			selectedHalamanId = halaman.id;
+			selectedHalamanNo = halaman.halaman;
+		} else {
+			selectedText = '';
+			selectedHalamanId = '';
+			selectedHalamanNo = 0;
+		}
+	}
+
+	function openSuggestionDialog() {
+		if (selectedText.trim()) {
+			showSuggestionDialog = true;
+		}
+	}
+
+	function closeSuggestionDialog() {
+		showSuggestionDialog = false;
+		selectedText = '';
+		terjemahanBaru = '';
+		alasanKeterangan = '';
+		selectedHalamanId = '';
+		selectedHalamanNo = 0;
+		window.getSelection()?.removeAllRanges();
+	}
+
+	async function submitSuggestion() {
+		if (!selectedText.trim() || !terjemahanBaru.trim() || !alasanKeterangan.trim()) {
+			toast.error('Semua field wajib diisi!');
+			return;
+		}
+
+		try {
+			const keterangan = `Selected Text:\n${selectedText}\n\nTerjemahan Baru:\n${terjemahanBaru}\n\nAlasan/Keterangan:\n${alasanKeterangan}`;
+
+			await pb.collection('penugasan').create({
+				pelapor: pb.authStore.model?.id,
+				buku: bookId,
+				awal_halaman: selectedHalamanNo,
+				akhir_halaman: selectedHalamanNo,
+				keterangan: keterangan,
+				status: 'Terlapor'
+			});
+
+			toast.success('Saran review terjemahan berhasil dikirim!');
+			closeSuggestionDialog();
+		} catch (error) {
+			console.error('Error submitting suggestion:', error);
+			toast.error('Terjadi kesalahan saat mengirim saran. Silakan coba lagi.');
+		}
+	}
+
+	// Check if button should be enabled
+	const isSuggestionEnabled = $derived(selectedText.trim().length > 0);
 
 	// Cleanup on component destroy
 	$effect(() => {
@@ -372,12 +450,25 @@
 								<h3 class="text-lg font-semibold text-foreground">
 									Halaman {halaman.halaman}
 								</h3>
+								<button
+									onclick={openSuggestionDialog}
+									disabled={!isSuggestionEnabled}
+									class="px-3 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+								>
+									Sarankan Review Terjemahan
+								</button>
 							</div>
 							
 							<!-- Desktop Layout: Split Screen -->
 							<div class="hidden lg:grid gap-6 {showImages ? 'lg:grid-cols-2' : 'lg:grid-cols-1'}">
 								<!-- Left Panel: Text (Terjemah) -->
-								<div class="bg-muted/30 rounded-lg p-4">
+								<div
+									class="bg-muted/30 rounded-lg p-4 select-text"
+									onmouseup={() => handleTextSelection(halaman)}
+									ontouchend={() => handleTextSelection(halaman)}
+									role="textbox"
+									tabindex="0"
+								>
 									<h4 class="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
 										Terjemah
 									</h4>
@@ -416,7 +507,13 @@
 							<!-- Mobile/Tablet Layout: Stacked -->
 							<div class="lg:hidden space-y-4">
 								<!-- Text Panel -->
-								<div class="bg-muted/30 rounded-lg p-4">
+								<div
+									class="bg-muted/30 rounded-lg p-4 select-text"
+									onmouseup={() => handleTextSelection(halaman)}
+									ontouchend={() => handleTextSelection(halaman)}
+									role="textbox"
+									tabindex="0"
+								>
 									<h4 class="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
 										Terjemah
 									</h4>
@@ -560,6 +657,97 @@
 			</div>
 		{/if}
 	</div>
+
+	<!-- Translation Suggestion Dialog -->
+	{#if showSuggestionDialog}
+		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onclick={closeSuggestionDialog}>
+			<div class="bg-card rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" onclick={(e) => e.stopPropagation()}>
+				<div class="p-6">
+					<div class="flex items-center justify-between mb-4">
+						<h2 class="text-xl font-semibold text-foreground">Sarankan Review Terjemahan</h2>
+						<button
+							onclick={closeSuggestionDialog}
+							class="text-muted-foreground hover:text-foreground transition-colors"
+							aria-label="Tutup dialog"
+						>
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+							</svg>
+						</button>
+					</div>
+
+					<form onsubmit={(e) => { e.preventDefault(); submitSuggestion(); }} class="space-y-4">
+						<!-- Selected Text (Read Only) -->
+						<div>
+							<label for="selectedText" class="block text-sm font-medium text-foreground mb-2">
+								Teks yang Dipilih <span class="text-red-500">*</span>
+							</label>
+							<textarea
+								id="selectedText"
+								name="selectedText"
+								value={selectedText}
+								readonly
+								required
+								rows="3"
+								class="w-full px-3 py-2 text-sm border border-border rounded-md bg-muted cursor-not-allowed"
+							></textarea>
+							<p class="text-xs text-muted-foreground mt-1">Teks ini diambil dari bagian yang Anda pilih</p>
+						</div>
+
+						<!-- Terjemahan Baru -->
+						<div>
+							<label for="terjemahanBaru" class="block text-sm font-medium text-foreground mb-2">
+								Terjemahan Baru <span class="text-red-500">*</span>
+							</label>
+							<textarea
+								id="terjemahanBaru"
+								name="terjemahanBaru"
+								bind:value={terjemahanBaru}
+								required
+								rows="4"
+								placeholder="Masukkan terjemahan baru yang Anda sarankan..."
+								class="w-full px-3 py-2 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+							></textarea>
+						</div>
+
+						<!-- Alasan/Keterangan -->
+						<div>
+							<label for="alasanKeterangan" class="block text-sm font-medium text-foreground mb-2">
+								Alasan/Keterangan <span class="text-red-500">*</span>
+							</label>
+							<textarea
+								id="alasanKeterangan"
+								name="alasanKeterangan"
+								bind:value={alasanKeterangan}
+								required
+								rows="3"
+								placeholder="Jelaskan alasan atau keterangan untuk saran ini..."
+								class="w-full px-3 py-2 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+							></textarea>
+						</div>
+
+						<!-- Form Actions -->
+						<div class="flex items-center justify-end space-x-3 pt-4 border-t border-border">
+							<button
+								type="button"
+								onclick={closeSuggestionDialog}
+								class="px-4 py-2 text-sm font-medium text-muted-foreground bg-muted rounded-md hover:bg-muted/80 transition-colors"
+							>
+								Batal
+							</button>
+							<button
+								type="submit"
+								disabled={!selectedText.trim() || !terjemahanBaru.trim() || !alasanKeterangan.trim()}
+								class="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+							>
+								Kirim Saran
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	{/if}
 {:else}
 	<div class="flex items-center justify-center min-h-screen">
 		<p class="text-lg text-muted-foreground">Buku tidak ditemukan.</p>

@@ -7,9 +7,10 @@
 		id: string;
 		judul: string;
 		deskripsi: string;
-		deadline: string;
 		status: string;
 		assignedTo: string;
+		awal_halaman: number;
+		akhir_halaman: number;
 	}
 
 	let assignments = $state<Assignment[]>([]);
@@ -23,7 +24,7 @@
 			goto('/login');
 		} else {
 			const user = pb.authStore.model;
-			if (!user || (user.akses !== 'Editor' && user.akses !== 'Penerjemah')) {
+			if (!user || (user.role !== 'Editor' && user.role !== 'Penerjemah')) {
 				// Redirect to dashboard if user doesn't have proper role
 				goto('/dashboard');
 				return;
@@ -37,16 +38,16 @@
 		try {
 			const records = await pb.collection('penugasan').getFullList({
 				sort: '-created',
-				expand: 'assignedTo'
+				expand: 'tertugas,buku'
 			});
-
 			assignments = records.map(record => ({
 				id: record.id,
-				judul: record.judul,
-				deskripsi: record.deskripsi,
-				deadline: record.deadline,
+				judul: record.expand?.buku?.judul || record.buku || 'N/A',
+				deskripsi: record.keterangan || 'N/A',
 				status: record.status,
-				assignedTo: record.expand?.assignedTo?.email || 'N/A'
+				assignedTo: record.expand?.tertugas?.email || record.tertugas || 'N/A',
+				awal_halaman: record.awal_halaman,
+				akhir_halaman: record.akhir_halaman
 			}));
 			filterAssignments();
 		} catch (error) {
@@ -104,10 +105,10 @@
 				class="w-full md:w-auto px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
 			>
 				<option value="all">Semua Status</option>
-				<option value="Pending">Pending</option>
-				<option value="In Progress">In Progress</option>
-				<option value="Completed">Completed</option>
-				<option value="Cancelled">Cancelled</option>
+				<option value="Terlapor">Terlapor</option>
+				<option value="Ditugaskan">Ditugaskan</option>
+				<option value="Disetujui">Disetujui</option>
+				<option value="Dibatalkan">Dibatalkan</option>
 			</select>
 		</div>
 	</div>
@@ -127,13 +128,16 @@
 							Deskripsi
 						</th>
 						<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-							Deadline
-						</th>
-						<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
 							Status
 						</th>
 						<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
 							Ditugaskan Kepada
+						</th>
+						<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+							Halaman Awal
+						</th>
+						<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+							Halaman Akhir
 						</th>
 					</tr>
 				</thead>
@@ -146,20 +150,23 @@
 							<td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
 								{assignment.deskripsi}
 							</td>
-							<td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-								{assignment.deadline}
-							</td>
 							<td class="px-6 py-4 whitespace-nowrap text-sm">
 								<span class="px-2 py-1 text-xs rounded-full
-									{assignment.status === 'Completed' ? 'bg-green-100 text-green-800' :
-									 assignment.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' :
-									 assignment.status === 'Pending' ? 'bg-blue-100 text-blue-800' :
+									{assignment.status === 'Disetujui' ? 'bg-green-100 text-green-800' :
+									 assignment.status === 'Ditugaskan' ? 'bg-yellow-100 text-yellow-800' :
+									 assignment.status === 'Terlapor' ? 'bg-blue-100 text-blue-800' :
 									 'bg-red-100 text-red-800'}">
 									{assignment.status}
 								</span>
 							</td>
 							<td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
 								{assignment.assignedTo}
+							</td>
+							<td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+								{assignment.awal_halaman}
+							</td>
+							<td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+								{assignment.akhir_halaman}
 							</td>
 						</tr>
 					{/each}
