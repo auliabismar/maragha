@@ -10,6 +10,8 @@
 		penulis: string[];
 		penerbit: string;
 		kategori: string[];
+		totalHalaman: number;
+		halamanSetuju: number;
 	}
 
 	let books = $state<Book[]>([]);
@@ -17,10 +19,22 @@
 	let selectedKategori = $state<string>('all');
 	let searchQuery = $state<string>('');
 	let availableKategoris = $state<string[]>([]);
+	let showImages = $state<boolean>(true);
 
 	onMount(() => {
 		fetchBooks();
+		loadImagePreference();
 	});
+
+	function loadImagePreference() {
+		const saved = localStorage.getItem('showImages');
+		showImages = saved === null ? true : saved === 'true';
+	}
+
+	function toggleImages() {
+		showImages = !showImages;
+		localStorage.setItem('showImages', showImages.toString());
+	}
 
 	async function fetchBooks() {
 		try {
@@ -29,15 +43,36 @@
 				expand: 'penulis,penerbit,kategori'
 			});
 
-			books = records.map(record => ({
-				id: record.id,
-				judul: record.judul,
-				cover: record.cover ? pb.files.getURL(record, record.cover) : undefined,
-				status: record.status,
-				penulis: record.expand?.penulis?.map((p: any) => p.id) || [],
-				penerbit: record.expand?.penerbit?.id || 'N/A',
-				kategori: record.expand?.kategori?.map((k: any) => k.id) || []
-			}));
+			// Get all halaman for all books
+			const allHalaman = await pb.collection('halaman').getFullList();
+			
+			// Group halaman by buku
+			const halamanByBuku = allHalaman.reduce((acc: any, halaman: any) => {
+				const bukuId = halaman.buku;
+				if (!acc[bukuId]) {
+					acc[bukuId] = [];
+				}
+				acc[bukuId].push(halaman);
+				return acc;
+			}, {});
+
+			books = records.map(record => {
+				const bookHalaman = halamanByBuku[record.id] || [];
+				const halamanSetuju = bookHalaman.filter((h: any) => h.status === 'Setuju').length;
+				const totalHalaman = bookHalaman.length;
+
+				return {
+					id: record.id,
+					judul: record.judul,
+					cover: record.cover ? pb.files.getURL(record, record.cover) : undefined,
+					status: record.status,
+					penulis: record.expand?.penulis?.map((p: any) => p.id) || [],
+					penerbit: record.expand?.penerbit?.id || 'N/A',
+					kategori: record.expand?.kategori?.map((k: any) => k.id) || [],
+					totalHalaman: totalHalaman,
+					halamanSetuju: halamanSetuju
+				};
+			});
 
 			// Extract unique kategoris
 			const kategoriSet = new Set<string>();
@@ -61,50 +96,153 @@
 			return matchesKategori && matchesSearch;
 		});
 	}
+
+	function calculateProgress(book: Book): number {
+		if (book.totalHalaman === 0) return 0;
+		return Math.round((book.halamanSetuju / book.totalHalaman) * 100);
+	}
 </script>
 
 <svelte:head>
-	<title>Maragha - Perpustakaan Digital</title>
-	<meta name="description" content="Maragha - Perpustakaan digital untuk koleksi buku-buku bersejarah dan naskah kuno" />
+	<title>Maragha - Merawat Warisan Intelektual Islam</title>
+	<meta name="description" content="Maragha: Platform perpustakaan digital untuk buku-buku klasik Arab yang telah diterjemahkan dan crowd sourcing terjemahan untuk melestarikan khazanah intelektual Islam." />
 </svelte:head>
 
 <main class="container mx-auto px-6 py-8">
-		<!-- Welcome Section -->
-		<section class="text-center mb-12">
-			<h2 class="text-4xl font-heading font-bold text-foreground mb-4">
-				Selamat Datang di Perpustakaan Maragha
-			</h2>
-			<p class="text-lg text-muted-foreground max-w-2xl mx-auto">
-				Koleksi digital naskah kuno dan buku-buku bersejarah untuk penelitian dan pembelajaran.
-			</p>
+		<!-- Hero Section -->
+		<section class="relative bg-gradient-to-br from-[#F3EFE0] to-[#E8E4D0] py-16 px-6 rounded-2xl mb-12 border border-[#D4A856]/20">
+			<!-- Background Pattern -->
+			<div class="absolute inset-0 opacity-5">
+				<svg class="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+					<defs>
+						<pattern id="islamic-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+							<circle cx="10" cy="10" r="2" fill="#29477B"/>
+							<path d="M10 5 L10 15 M5 10 L15 10" stroke="#29477B" stroke-width="0.5"/>
+						</pattern>
+					</defs>
+					<rect width="100%" height="100%" fill="url(#islamic-pattern)"/>
+				</svg>
+			</div>
+
+			<div class="relative z-10 text-center max-w-4xl mx-auto">
+				<!-- Main Heading -->
+				<h1 class="text-5xl md:text-6xl font-heading font-bold text-[#29477B] mb-6 leading-tight">
+					Merawat Warisan<br/>
+					<span class="text-[#64463C]">Intelektual Islam</span>
+				</h1>
+
+				<!-- Subheading -->
+				<p class="text-xl md:text-2xl text-[#64463C] mb-8 font-medium leading-relaxed">
+					Platform perpustakaan digital untuk<br/>
+					<span class="text-[#29477B] font-semibold">buku-buku klasik Arab</span> yang telah diterjemahkan<br/>
+					dengan semangat <span class="text-[#D4A856] font-semibold">gotong royong literasi</span>
+				</p>
+
+				<!-- Description -->
+				<p class="text-lg text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed">
+					Bergabunglah dalam misi melestarikan dan menyemarakkan khazanah intelektual Islam
+					melalui terjemahan kolaboratif naskah-naskah berharga yang telah mendekati keilmuan
+					selama berabad-abad.
+				</p>
+
+				<!-- Call to Action Buttons -->
+				<div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+					<a
+						href="/register"
+						class="bg-[#29477B] text-white px-8 py-4 rounded-xl font-semibold text-lg
+							   hover:bg-[#1e3658] transition-all duration-300 shadow-lg hover:shadow-xl
+							   transform hover:-translate-y-1"
+					>
+						🚀 Mulai Menerjemahkan
+					</a>
+					<a
+						href="/buku"
+						class="bg-transparent border-2 border-[#D4A856] text-[#D4A856] px-8 py-4
+							   rounded-xl font-semibold text-lg hover:bg-[#D4A856] hover:text-white
+							   transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+					>
+						📚 Jelajahi Koleksi
+					</a>
+				</div>
+
+				<!-- Stats/Features -->
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 pt-8 border-t border-[#D4A856]/30">
+					<div class="text-center">
+						<div class="text-3xl font-bold text-[#29477B] mb-2">500+</div>
+						<div class="text-[#64463C] font-medium">Buku Klasik</div>
+					</div>
+					<div class="text-center">
+						<div class="text-3xl font-bold text-[#D4A856] mb-2">1000+</div>
+						<div class="text-[#64463C] font-medium">Penerjemah Aktif</div>
+					</div>
+					<div class="text-center">
+						<div class="text-3xl font-bold text-[#64463C] mb-2">50+</div>
+						<div class="text-[#64463C] font-medium">Editor Profesional</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Decorative Elements -->
+			<div class="absolute top-4 right-4 text-[#D4A856] opacity-20">
+				<svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
+					<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+				</svg>
+			</div>
+			<div class="absolute bottom-4 left-4 text-[#A1A2A6] opacity-20">
+				<svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
+					<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+				</svg>
+			</div>
 		</section>
 
 		<!-- Search and Filter Section -->
 		<section class="mb-8">
 			<div class="flex flex-col md:flex-row gap-4 items-center justify-between">
-				<!-- Search Input -->
-				<div class="w-full md:w-1/2">
-					<input
-						type="text"
-						placeholder="Cari buku, penulis, atau kategori..."
-						bind:value={searchQuery}
-						oninput={filterBooks}
-						class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
-					/>
+				<div class="flex flex-col sm:flex-row gap-4 w-full">
+					<!-- Search Input -->
+					<div class="w-full md:w-1/2">
+						<input
+							type="text"
+							placeholder="Cari buku, penulis, atau kategori..."
+							bind:value={searchQuery}
+							oninput={filterBooks}
+							class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
+						/>
+					</div>
+
+					<!-- Kategori Filter -->
+					<div class="w-full md:w-auto">
+						<select
+							bind:value={selectedKategori}
+							onchange={filterBooks}
+							class="w-full md:w-auto px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
+						>
+							<option value="all">Semua Kategori</option>
+							{#each availableKategoris as kategori}
+								<option value={kategori}>{kategori}</option>
+							{/each}
+						</select>
+					</div>
 				</div>
 
-				<!-- Kategori Filter -->
-				<div class="w-full md:w-auto">
-					<select
-						bind:value={selectedKategori}
-						onchange={filterBooks}
-						class="w-full md:w-auto px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
+				<!-- Image Display Toggle -->
+				<div class="flex items-center gap-2">
+					<button
+						onclick={toggleImages}
+						class="flex items-center gap-2 px-3 py-2 text-sm border border-border rounded-lg hover:bg-muted transition-colors"
 					>
-						<option value="all">Semua Kategori</option>
-						{#each availableKategoris as kategori}
-							<option value={kategori}>{kategori}</option>
-						{/each}
-					</select>
+						{#if showImages}
+							<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+								<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+							</svg>
+							Sembunyikan Gambar
+						{:else}
+							<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+								<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78 3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>
+							</svg>
+							Tampilkan Gambar
+						{/if}
+					</button>
 				</div>
 			</div>
 		</section>
@@ -115,18 +253,29 @@
 				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 					{#each filteredBooks as book}
 						<div class="bg-card rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-							<div class="aspect-[5/7] bg-muted flex items-center justify-center">
-								{#if book.cover}
-									<img src={book.cover} alt={book.judul} class="w-full h-full object-cover" />
-								{:else}
-									<div class="text-muted-foreground">
-										<svg class="w-16 h-16 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
-											<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+							{#if showImages}
+								<div class="aspect-[5/7] bg-muted flex items-center justify-center">
+									{#if book.cover}
+										<img src={book.cover} alt={book.judul} class="w-full h-full object-cover" />
+									{:else}
+										<div class="text-muted-foreground">
+											<svg class="w-16 h-16 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+												<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+											</svg>
+											<p class="text-sm">No Cover</p>
+										</div>
+									{/if}
+								</div>
+							{:else}
+								<div class="aspect-[5/7] bg-muted flex items-center justify-center border border-dashed border-border">
+									<div class="text-muted-foreground text-center">
+										<svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="currentColor" viewBox="0 0 24 24">
+											<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
 										</svg>
-										<p class="text-sm">No Cover</p>
+										<p class="text-sm opacity-50">Gambar disembunyikan</p>
 									</div>
-								{/if}
-							</div>
+								</div>
+							{/if}
 							<div class="p-4">
 								<h3 class="font-heading font-semibold text-lg text-foreground mb-2 line-clamp-2">
 									{book.judul}
@@ -142,6 +291,24 @@
 								<p class="text-sm text-muted-foreground mb-3">
 									Penerbit: {book.penerbit}
 								</p>
+								
+								<!-- Progress Bar -->
+								<div class="mb-3">
+									<div class="flex items-center justify-between mb-1">
+										<span class="text-sm text-muted-foreground">Progress Terjemahan</span>
+										<span class="text-sm font-medium text-foreground">{calculateProgress(book)}%</span>
+									</div>
+									<div class="w-full bg-muted rounded-full h-2">
+										<div
+											class="bg-green-600 h-2 rounded-full transition-all duration-300"
+											style="width: {calculateProgress(book)}%"
+										></div>
+									</div>
+									<p class="text-xs text-muted-foreground mt-1">
+										{book.halamanSetuju} dari {book.totalHalaman} halaman
+									</p>
+								</div>
+								
 								<div class="flex items-center justify-between">
 									{#if book.kategori.length > 0}
 										<div class="flex flex-wrap gap-1">
@@ -161,9 +328,6 @@
 											Tidak ada kategori
 										</span>
 									{/if}
-									<button class="text-primary hover:text-accent text-sm font-medium">
-										Lihat Detail
-									</button>
 								</div>
 							</div>
 						</div>

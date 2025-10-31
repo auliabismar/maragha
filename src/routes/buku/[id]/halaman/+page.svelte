@@ -29,6 +29,7 @@
 	let totalPages = $state(1);
 	let loading = $state(true);
 	let lemariRecord = $state<any>(null);
+	let jumpPageInput = $state('');
 
 	// Get book ID from route params
 	const bookId = $derived($page.params.id);
@@ -174,6 +175,31 @@
 			fetchHalaman();
 			// Scroll to top of page
 			window.scrollTo({ top: 0, behavior: 'smooth' });
+		}
+	}
+
+	function jumpToPage() {
+		const pageNumber = parseInt(jumpPageInput);
+		
+		// Validate input: must be positive integer
+		if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= totalPages) {
+			goToPage(pageNumber);
+			jumpPageInput = ''; // Clear input after successful jump
+		}
+		// If invalid, do nothing (input will be cleared when focus is lost)
+	}
+
+	function handleJumpInputKeydown(event: KeyboardEvent) {
+		if (event.key === 'Enter') {
+			jumpToPage();
+		}
+	}
+
+	function handleJumpInputBlur() {
+		// Clear input when focus is lost if invalid
+		const pageNumber = parseInt(jumpPageInput);
+		if (isNaN(pageNumber) || pageNumber < 1 || pageNumber > totalPages) {
+			jumpPageInput = '';
 		}
 	}
 
@@ -404,8 +430,31 @@
 						<p class="text-xs text-muted-foreground mb-4">
 							Gunakan ← dan → untuk navigasi halaman
 						</p>
-						
-						
+					</div>
+
+					<!-- Jump to Page Input -->
+					<div class="flex items-center justify-center space-x-2 mb-4">
+						<label for="jump-page" class="text-sm text-muted-foreground whitespace-nowrap">
+							Loncat ke halaman:
+						</label>
+						<input
+							id="jump-page"
+							type="number"
+							min="1"
+							max={totalPages}
+							bind:value={jumpPageInput}
+							onkeydown={handleJumpInputKeydown}
+							onblur={handleJumpInputBlur}
+							placeholder="1-{totalPages}"
+							class="w-20 px-2 py-1 text-sm text-center border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+						/>
+						<button
+							onclick={jumpToPage}
+							disabled={!jumpPageInput || isNaN(parseInt(jumpPageInput)) || parseInt(jumpPageInput) < 1 || parseInt(jumpPageInput) > totalPages}
+							class="px-3 py-1 text-xs font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+						>
+							GO
+						</button>
 					</div>
 					
 					<!-- Standard Pagination -->
@@ -464,7 +513,7 @@
 							aria-label="Halaman terakhir"
 							class="px-3 py-2 text-sm font-medium text-muted-foreground bg-card border border-border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
-							{'>'}
+							{'>>'}
 						</button>
 					</nav>
 				</div>
