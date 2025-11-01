@@ -5,7 +5,11 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 const config = {
 	// Consult https://svelte.dev/docs/kit/integrations
 	// for more information about preprocessors
-	preprocess: vitePreprocess(),
+	preprocess: vitePreprocess({
+		// Add any other preprocessors here if needed
+		// For example, if you have other Svelte component libraries that ship .svelte files
+		// and are not pre-compiled, you might need to include them here.
+	}),
 
 	compilerOptions: {
 		runes: true

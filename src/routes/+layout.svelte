@@ -5,6 +5,8 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { Toaster } from 'svelte-sonner';
+	import DarkModeToggle from '$lib/components/DarkModeToggle.svelte';
+	import { theme } from '$lib/stores/theme'; // Import theme to initialize it
 
 	let { children } = $props();
 	let user = $state<any | null>(null);
@@ -53,7 +55,7 @@
 	<link rel="icon" href="/logo.svg" />
 </svelte:head>
 
-<div class="min-h-screen bg-background">
+<div class="min-h-screen bg-background" data-theme={$theme}>
 	<!-- Header -->
 	<header class="bg-primary text-primary-foreground shadow-lg">
 		<div class="container mx-auto px-6 py-4">
@@ -70,6 +72,7 @@
 					{#if user && (user.role === 'Editor' || user.role === 'Penerjemah')}
 						<a href="/penugasan" class="hover:text-accent transition-colors">Penugasan</a>
 					{/if}
+					<DarkModeToggle />
 					{#if user}
 						<button onclick={goToProfile} class="flex items-center space-x-2 hover:text-accent transition-colors">
 							{#if avatarUrl}
