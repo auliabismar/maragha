@@ -14,7 +14,10 @@
 		try {
 			// Use PocketBase's built-in OAuth2 method to handle the authentication flow
 			await pb.collection('users').authWithOAuth2({
-				provider: 'google'
+				provider: 'google',
+				createData: {
+					akses: 'Pembaca',
+				}
 			});
 
 			// Authentication was successful
