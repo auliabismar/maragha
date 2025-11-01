@@ -22,6 +22,7 @@ import { toast } from 'svelte-sonner';
 		terjemah: string;
 		image?: string;
 		buku: string;
+		status?: string;
 	}
 
 	let book = $state<Book | null>(null);
@@ -144,7 +145,7 @@ import { toast } from 'svelte-sonner';
 		
 		try {
 			const records = await pb.collection('halaman').getList(currentPage, itemsPerPage, {
-				filter: `buku = "${bookId}"`,
+				filter: `buku = "${bookId}" && status != "Draft"`,
 				sort: 'halaman',
 				expand: 'buku',
 				signal: abortController.signal
@@ -155,6 +156,7 @@ import { toast } from 'svelte-sonner';
 				halaman: record.halaman,
 				terjemah: record.terjemah,
 				image: record.image ? pb.files.getURL(record, record.image) : undefined,
+				status: record.status,
 				buku: record.buku
 			}));
 
