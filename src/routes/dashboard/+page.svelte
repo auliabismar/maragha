@@ -11,6 +11,8 @@
 		penulis: string[];
 		penerbit: string;
 		kategori: string[];
+		totalHalaman: number;
+		halamanSetuju: number;
 	}
 
 	let books = $state<Book[]>([]);
@@ -37,15 +39,36 @@
 				expand: 'penulis,penerbit,kategori'
 			});
 
-			books = records.map(record => ({
-				id: record.id,
-				judul: record.judul,
-				cover: record.cover ? pb.files.getURL(record, record.cover) : undefined,
-				status: record.status,
-				penulis: record.expand?.penulis?.map((p: any) => p.id) || [],
-				penerbit: record.expand?.penerbit?.id || 'N/A',
-				kategori: record.expand?.kategori?.map((k: any) => k.id) || []
-			}));
+			// Get all halaman for all books
+			const allHalaman = await pb.collection('halaman').getFullList();
+			
+			// Group halaman by buku
+			const halamanByBuku = allHalaman.reduce((acc: any, halaman: any) => {
+				const bukuId = halaman.buku;
+				if (!acc[bukuId]) {
+					acc[bukuId] = [];
+				}
+				acc[bukuId].push(halaman);
+				return acc;
+			}, {});
+
+			books = records.map(record => {
+				const bookHalaman = halamanByBuku[record.id] || [];
+				const halamanSetuju = bookHalaman.filter((h: any) => h.status === 'Setuju').length;
+				const totalHalaman = bookHalaman.length;
+
+				return {
+					id: record.id,
+					judul: record.judul,
+					cover: record.cover ? pb.files.getURL(record, record.cover) : undefined,
+					status: record.status,
+					penulis: record.expand?.penulis?.map((p: any) => p.id) || [],
+					penerbit: record.expand?.penerbit?.id || 'N/A',
+					kategori: record.expand?.kategori?.map((k: any) => k.id) || [],
+					totalHalaman: totalHalaman,
+					halamanSetuju: halamanSetuju
+				};
+			});
 
 			// Extract unique kategoris
 			const kategoriSet = new Set<string>();
@@ -68,6 +91,11 @@
 				book.kategori.some(k => k.toLowerCase().includes(searchQuery.toLowerCase()));
 			return matchesKategori && matchesSearch;
 		});
+	}
+
+	function calculateProgress(book: Book): number {
+		if (book.totalHalaman === 0) return 0;
+		return Math.round((book.halamanSetuju / book.totalHalaman) * 100);
 	}
 
 	async function handleLogout() {
@@ -154,6 +182,24 @@
 						<p class="text-sm text-muted-foreground mb-3">
 							Penerbit: {book.penerbit}
 						</p>
+						
+						<!-- Progress Bar -->
+						<div class="mb-3">
+							<div class="flex items-center justify-between mb-1">
+								<span class="text-sm text-muted-foreground">Progress Terjemahan</span>
+								<span class="text-sm font-medium text-foreground">{calculateProgress(book)}%</span>
+							</div>
+							<div class="w-full bg-muted rounded-full h-2">
+								<div
+									class="bg-green-600 h-2 rounded-full transition-all duration-300"
+									style="width: {calculateProgress(book)}%"
+								></div>
+							</div>
+							<p class="text-xs text-muted-foreground mt-1">
+								{book.halamanSetuju} dari {book.totalHalaman} halaman
+							</p>
+						</div>
+						
 						<div class="flex items-center justify-between">
 							{#if book.kategori.length > 0}
 								<div class="flex flex-wrap gap-1">

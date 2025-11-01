@@ -35,7 +35,7 @@
 <!-- Google Sign-In Button -->
 <button
 	type="button"
-	on:click={signInWithGoogle}
+	onclick={signInWithGoogle}
 	disabled={loading}
 	class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
 	aria-label="Sign in with Google"
