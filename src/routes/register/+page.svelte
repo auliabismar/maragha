@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import pb from '$lib/pocketbase';
+import GoogleLoginButton from '$lib/components/GoogleLoginButton.svelte';
 
 	let email = $state<string>('');
 	let password = $state<string>('');
@@ -44,6 +45,17 @@
 	<div class="w-full max-w-md p-8 space-y-6 bg-card rounded-lg shadow-lg">
 		<div class="flex justify-center">
 			<img src="/logo.svg" alt="Maragha Logo" class="h-16 w-16" />
+		<div class="space-y-4">
+			<GoogleLoginButton />
+			<div class="relative">
+				<div class="absolute inset-0 flex items-center">
+					<div class="w-full border-t border-muted"></div>
+				</div>
+				<div class="relative flex justify-center text-sm">
+					<span class="bg-card px-2 text-muted-foreground">atau</span>
+				</div>
+			</div>
+		</div>
 		</div>
 		<h2 class="text-3xl font-heading font-bold text-center text-foreground">Daftar</h2>
 		<form onsubmit={(e) => { e.preventDefault(); handleRegister(); }} class="space-y-4">
