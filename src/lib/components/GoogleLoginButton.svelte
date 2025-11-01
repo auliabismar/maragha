@@ -10,7 +10,7 @@
 		const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 		// Get the callback URL - this will be the URL that Google redirects to after authentication
-		const callbackUrl = `${window.location.origin}/oauth2/callback`;
+		const callbackUrl = `https://pbmaragha.almagazi.id/api/oauth2-redirect`;
 
 		// Define the scopes for the OAuth2 request
 		const scope = encodeURIComponent('openid email profile');
