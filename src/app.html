@@ -6,6 +6,27 @@
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+		
+		<!-- Theme initialization script - runs before page renders to prevent flash -->
+		<script>
+			(function() {
+				function getTheme() {
+					const stored = localStorage.getItem('theme');
+					if (stored === 'light' || stored === 'dark') {
+						return stored;
+					}
+					if (stored === 'system' || !stored) {
+						return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+					}
+					return 'light';
+				}
+				
+				const theme = getTheme();
+				document.documentElement.classList.add(theme);
+				document.documentElement.setAttribute('data-theme', theme);
+			})();
+		</script>
+		
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
