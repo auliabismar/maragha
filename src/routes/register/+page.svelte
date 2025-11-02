@@ -45,6 +45,7 @@ import GoogleLoginButton from '$lib/components/GoogleLoginButton.svelte';
 	<div class="w-full max-w-md p-8 space-y-6 bg-card rounded-lg shadow-lg">
 		<div class="flex justify-center">
 			<img src="/logo.svg" alt="Maragha Logo" class="h-16 w-16" />
+		</div>
 		<div class="space-y-4">
 			<GoogleLoginButton />
 			<div class="relative">
@@ -55,7 +56,6 @@ import GoogleLoginButton from '$lib/components/GoogleLoginButton.svelte';
 					<span class="bg-card px-2 text-muted-foreground">atau</span>
 				</div>
 			</div>
-		</div>
 		</div>
 		<h2 class="text-3xl font-heading font-bold text-center text-foreground">Daftar</h2>
 		<form onsubmit={(e) => { e.preventDefault(); handleRegister(); }} class="space-y-4">
