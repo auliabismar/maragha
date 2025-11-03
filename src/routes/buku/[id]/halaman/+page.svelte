@@ -486,9 +486,7 @@
                   >
                     Terjemah
                   </h4>
-                  <div
-                    class="prose prose-sm max-w-none text-[var(--foreground)] leading-relaxed"
-                  >
+                  <div class="terjemah-content max-w-none leading-relaxed">
                     {@html halaman.terjemah}
                   </div>
                 </div>
@@ -542,9 +540,7 @@
                   >
                     Terjemah
                   </h4>
-                  <div
-                    class="prose prose-sm max-w-none text-[var(--foreground)] leading-relaxed"
-                  >
+                  <div class="terjemah-content max-w-none leading-relaxed">
                     {@html halaman.terjemah}
                   </div>
                 </div>

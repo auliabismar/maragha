@@ -140,4 +140,93 @@
   h6 {
     font-family: "Playfair Display", serif;
   }
+.terjemah-content {
+    color: var(--foreground); /* Warna teks default */
+    font-size: 0.875rem; /* Setara dengan prose-sm */
+    line-height: 1.625; /* Setara dengan prose-sm */
+  }
+
+  .terjemah-content h1,
+  .terjemah-content h2,
+  .terjemah-content h3,
+  .terjemah-content h4,
+  .terjemah-content h5,
+  .terjemah-content h6 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: var(--foreground);
+    margin-bottom: 0.75em;
+    margin-top: 1.25em;
+  }
+
+  .terjemah-content h1 {
+    font-size: 2rem;
+  }
+  .terjemah-content h2 {
+    font-size: 1.5rem;
+  }
+  .terjemah-content h3 {
+    font-size: 1.25rem;
+  }
+  .terjemah-content h4 {
+    font-size: 1.125rem;
+  }
+
+  .terjemah-content p {
+    color: var(--foreground);
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+  }
+
+  .terjemah-content ol {
+    list-style-type: decimal; /* Ini akan memunculkan nomor */
+    margin-left: 1.5rem;
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+  }
+
+  .terjemah-content ul {
+    list-style-type: disc; /* Ini akan memunculkan bullet points */
+    margin-left: 1.5rem;
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+  }
+
+  .terjemah-content li {
+    color: var(--foreground);
+    margin-top: 0.5em;
+  }
+
+  .terjemah-content li::marker {
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  .terjemah-content blockquote {
+    font-style: italic;
+    color: var(--muted-foreground);
+    background-color: var(--accent);
+    border-left-width: 4px;
+    border-color: var(--primary);
+    padding: 0.5em 1em;
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+  }
+
+  .terjemah-content blockquote p {
+    color: var(--muted-foreground);
+    margin: 0;
+  }
+
+  .terjemah-content a {
+    color: var(--primary);
+    text-decoration: underline;
+    font-weight: 500;
+  }
+
+  .terjemah-content strong,
+  .terjemah-content b {
+    color: var(--foreground);
+    font-weight: 700;
+  }
 }
