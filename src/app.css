@@ -2,7 +2,7 @@
 
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+/* @custom-variant dark (&:is(.dark *)); */
 
 :root {
   --radius: 0.625rem;
@@ -73,10 +73,10 @@
 
 
 [data-theme="dark"] {
-  --background: var(--color-paper-950);
-  --foreground: var(--color-paper-50);
-  --card: var(--color-paper-900);
-  --card-foreground: var(--color-paper-50);
+  --background: var(--color-paper-900);
+  --foreground: var(--color-paper-100);
+  --card: var(--color-paper-800);
+  --card-foreground: var(--color-paper-200);
   --popover: var(--color-paper-900);
   --popover-foreground: var(--color-paper-50);
   --primary: var(--color-ribbon-600);

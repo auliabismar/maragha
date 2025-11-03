@@ -40,9 +40,9 @@ function applyTheme(value: Theme) {
 	root.setAttribute('data-theme', resolved);
 
 	// Remove both classes first
-	root.classList.remove('light', 'dark');
+	// root.classList.remove('light', 'dark');
 	// Add the resolved theme
-	root.classList.add(resolved);
+	// root.classList.add(resolved);
 	
 	// Store preference
 	localStorage.setItem('theme', value);

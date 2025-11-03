@@ -64,7 +64,7 @@
 	<link rel="icon" href="/logo.svg" />
 </svelte:head>
 
-<div class="min-h-screen" style="background-color: var(--background)" data-theme={$theme}>
+<div class="min-h-screen" style="background-color: var(--background)">
 	<!-- Header -->
 	<header class="bg-ribbon-600 text-white shadow-lg">
 		<div class="container mx-auto px-4 sm:px-6 py-4">
