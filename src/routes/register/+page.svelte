@@ -59,7 +59,7 @@
         </div>
       </div>
     </div>
-    <h2 class="text-3xl font-heading font-bold text-center text-[var(--foreground)]">
+    <h2 class="text-3xl font-heading font-bold text-center text-[var(--muted-foreground)]">
       Daftar
     </h2>
     <form
