@@ -71,7 +71,6 @@
         {#if error}
           <p class="text-sm text-red-500">{error}</p>
         {/if}
-{JSON.stringify(user)}
         {#if user?.oauth2_id === ''}
           <button
             onclick={requestPasswordReset}
