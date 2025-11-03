@@ -224,7 +224,7 @@
   >
     <div class="container mx-auto px-6 text-center">
       <p>
-        &copy; 2025 Maragha. Made with ❤️ by <a href="https://almagazi.id">al-Magazi</a>.
+        &copy; 2025 Maragha. Made with <a href="/tentang">❤️</a> by <a href="https://almagazi.id">al-Magazi</a>.
       </p>
     </div>
   </footer>
