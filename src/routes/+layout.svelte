@@ -114,7 +114,7 @@
               >Lemari Buku</a
             >
           {/if}
-          {#if user && (user.role === 'Editor' || user.role === 'Penerjemah')}
+          {#if user && (user.akses === 'Editor' || user.akses === 'Penerjemah')}
             <a href="/penugasan" class="hover:text-[var(--accent)] transition-colors"
               >Penugasan</a
             >
@@ -167,8 +167,7 @@
                 onclick={closeMobileMenu}>Lemari Buku</a
               >
             {/if}
-            {JSON.stringify(user)}
-            {#if user && (user.role === 'Editor' || user.role === 'Penerjemah')}
+            {#if user && (user.akses === 'Editor' || user.akses === 'Penerjemah')}
               <a
                 href="/penugasan"
                 class="hover:text-[var(--accent)] transition-colors px-2 py-1"
