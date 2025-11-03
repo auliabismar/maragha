@@ -7,42 +7,33 @@
 :root {
   --radius: 0.625rem;
 
-  /* Maragha Brand Colors */
-  --maragha-background: #F3EFE0;
-  --maragha-dark-blue: #29477B;
-  --maragha-brown: #64463C;
-  --maragha-gray: #A1A2A6;
-  --maragha-gold: #D4A856;
+  /* Maragha Brand Colors (from PRD) */
+  --maragha-background: #f3efe0;
+  --maragha-dark-blue: #29477b;
+  --maragha-brown: #64463c;
+  --maragha-gray: #a1a2a6;
+  --maragha-gold: #d4a856;
 
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-
-  --primary: 222.2 47.4% 11.2%;
-  --primary-foreground: 210 40% 98%;
-
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 222.2 84% 4.9%;
-
-  --radius: 0.5rem;
+  /* Light Theme Semantic Colors (Using OKLCH) */
+  --background: var(--color-paper-50);
+  --foreground: var(--color-paper-950);
+  --card: var(--color-paper-50);
+  --card-foreground: var(--color-paper-950);
+  --popover: var(--color-paper-50);
+  --popover-foreground: var(--color-paper-950);
+  --primary: var(--color-ribbon-600);
+  --primary-foreground: var(--color-paper-50);
+  --secondary: var(--color-paper-100);
+  --secondary-foreground: var(--color-ribbon-900);
+  --muted: var(--color-paper-100);
+  --muted-foreground: var(--color-paper-700);
+  --accent: var(--color-paper-100);
+  --accent-foreground: var(--color-ribbon-900);
+  --destructive: var(--color-ribbon-800);
+  --destructive-foreground: var(--color-paper-50);
+  --border: var(--color-paper-200);
+  --input: var(--color-paper-200);
+  --ring: var(--color-ribbon-500);
 
   /* Ribbon Colors */
   --color-ribbon-50: oklch(0.965 0.011 252.08);
@@ -58,7 +49,7 @@
   --color-ribbon-950: oklch(0.207 0.032 244.33);
 
   /* Paper Colors */
-  --color-paper-50: oklch(0.974 0.007 80.68);
+  --color-paper-50: oklch(0.974 0.007 80.68); /* <-- This is your #F3EFE0 */
   --color-paper-100: oklch(0.94 0.021 81.76);
   --color-paper-200: oklch(0.882 0.046 83.26);
   --color-paper-300: oklch(0.785 0.049 83.87);
@@ -68,7 +59,7 @@
   --color-paper-700: oklch(0.413 0.025 81.6);
   --color-paper-800: oklch(0.328 0.02 82.63);
   --color-paper-900: oklch(0.233 0.014 81.59);
-  --color-paper-950: oklch(0.178 0.012 91.79);
+  --color-paper-950: oklch(0.178 0.012 91.79); /* <-- This is your dark brown text */
 }
 
 
