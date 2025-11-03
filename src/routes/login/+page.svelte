@@ -29,7 +29,7 @@ import GoogleLoginButton from '$lib/components/GoogleLoginButton.svelte';
 </svelte:head>
 
 <div class="flex items-center justify-center min-h-screen">
-	<div class="w-full max-w-md p-8 space-y-6 bg-paper-50 rounded-lg shadow-lg">
+	<div class="w-full max-w-md p-8 space-y-6 bg-[var(--color-paper-50)] rounded-lg shadow-lg">
 		<div class="flex justify-center">
 			<img src="/logo.svg" alt="Maragha Logo" class="h-16 w-16" />
 		</div>
@@ -37,33 +37,33 @@ import GoogleLoginButton from '$lib/components/GoogleLoginButton.svelte';
 			<GoogleLoginButton />
 			<div class="relative">
 				<div class="absolute inset-0 flex items-center">
-					<div class="w-full border-t border-muted"></div>
+					<div class="w-full border-t border-[var(--muted)]"></div>
 				</div>
 				<div class="relative flex justify-center text-sm">
-					<span class="bg-paper-50 px-2 text-paper-600">atau</span>
+					<span class="bg-[var(--color-paper-50)] px-2 text-[var(--color-paper-600)]">atau</span>
 				</div>
 			</div>
 		</div>
-		<h2 class="text-3xl font-heading font-bold text-center text-foreground">Masuk</h2>
+		<h2 class="text-3xl font-heading font-bold text-center text-[var(--foreground)]">Masuk</h2>
 		<form onsubmit={(e) => { e.preventDefault(); handleLogin(); }} class="space-y-4">
 			<div>
-				<label for="email" class="block text-sm font-medium text-muted-foreground">Email</label>
+				<label for="email" class="block text-sm font-medium text-[var(--muted-foreground)]">Email</label>
 				<input
 					type="email"
 					id="email"
 					bind:value={email}
 					required
-					class="mt-1 block w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+					class="mt-1 block w-full px-3 py-2 border border-[var(--border)] rounded-md shadow-sm focus:outline-none focus:ring-[var(--primary)] focus:border-[var(--primary)"
 				/>
 			</div>
 			<div>
-				<label for="password" class="block text-sm font-medium text-muted-foreground">Password</label>
+				<label for="password" class="block text-sm font-medium text-[var(--muted-foreground)]">Password</label>
 				<input
 					type="password"
 					id="password"
 					bind:value={password}
 					required
-					class="mt-1 block w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+					class="mt-1 block w-full px-3 py-2 border border-[var(--border)] rounded-md shadow-sm focus:outline-none focus:ring-[var(--primary)] focus:border-[var(--primary)"
 				/>
 			</div>
 
@@ -74,7 +74,7 @@ import GoogleLoginButton from '$lib/components/GoogleLoginButton.svelte';
 			<button
 				type="submit"
 				disabled={loading}
-				class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-ribbon-600 hover:bg-ribbon-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ribbon-500 disabled:opacity-50"
+				class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[var(--color-ribbon-600)] hover:bg-[var(--color-ribbon-700)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-ribbon-500)] disabled:opacity-50"
 			>
 				{#if loading}
 					Memuat...
@@ -83,8 +83,8 @@ import GoogleLoginButton from '$lib/components/GoogleLoginButton.svelte';
 				{/if}
 			</button>
 		</form>
-		<p class="text-center text-sm text-muted-foreground">
-			Belum punya akun? <a href="/register" class="font-medium text-primary hover:text-accent">Daftar</a>
+		<p class="text-center text-sm text-[var(--muted-foreground)]">
+			Belum punya akun? <a href="/register" class="font-medium text-[var(--secondary)] hover:text-[var(--accent)]">Daftar</a>
 		</p>
 	</div>
 </div>
