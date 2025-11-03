@@ -43,7 +43,7 @@
 </svelte:head>
 
 <div class="flex items-center justify-center min-h-screen">
-	<div class="w-full max-w-md p-8 space-y-6 bg-card rounded-lg shadow-lg">
+	<div class="w-full max-w-md p-8 space-y-6 bg-paper-50 rounded-lg shadow-lg">
 		<h2 class="text-3xl font-heading font-bold text-center text-foreground">Profil Pengguna</h2>
 
 		{#if user}
@@ -71,7 +71,7 @@
 				<button
 					onclick={requestPasswordReset}
 					disabled={loading}
-					class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
+					class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-ribbon-600 hover:bg-ribbon-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ribbon-500 disabled:opacity-50"
 				>
 					{#if loading}
 						Memuat...

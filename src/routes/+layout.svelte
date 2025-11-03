@@ -64,9 +64,9 @@
 	<link rel="icon" href="/logo.svg" />
 </svelte:head>
 
-<div class="min-h-screen bg-background" data-theme={$theme}>
+<div class="min-h-screen" style="background-color: var(--background)" data-theme={$theme}>
 	<!-- Header -->
-	<header class="bg-primary text-primary-foreground shadow-lg">
+	<header class="bg-ribbon-600 text-white shadow-lg">
 		<div class="container mx-auto px-4 sm:px-6 py-4">
 			<div class="flex items-center justify-between">
 				<a href="/" class="flex items-center space-x-2">
@@ -76,7 +76,7 @@
 				
 				<!-- Mobile hamburger menu button -->
 				<button
-					class="md:hidden p-2 rounded-md hover:bg-primary-foreground hover:text-primary transition-colors"
+					class="md:hidden p-2 rounded-md hover:bg-ribbon-500 hover:text-white transition-colors"
 					onclick={toggleMobileMenu}
 					aria-label="Toggle mobile menu"
 					aria-expanded={isMobileMenuOpen}
@@ -109,7 +109,7 @@
 							{#if avatarUrl}
 								<img src={avatarUrl} alt="Avatar" class="w-8 h-8 rounded-full object-cover" />
 							{:else if userInitials}
-								<div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-primary-foreground font-bold">
+								<div class="w-8 h-8 rounded-full bg-ribbon-500 flex items-center justify-center text-white font-bold">
 									{userInitials}
 								</div>
 							{/if}
@@ -140,7 +140,7 @@
 										{#if avatarUrl}
 											<img src={avatarUrl} alt="Avatar" class="w-8 h-8 rounded-full object-cover" />
 										{:else if userInitials}
-											<div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-primary-foreground font-bold">
+											<div class="w-8 h-8 rounded-full bg-ribbon-500 flex items-center justify-center text-white font-bold">
 												{userInitials}
 											</div>
 										{/if}
@@ -164,7 +164,7 @@
 	<Toaster />
 
 	<!-- Footer -->
-	<footer class="bg-primary text-primary-foreground py-8 mt-16">
+	<footer class="bg-ribbon-600 text-white py-8 mt-16">
 		<div class="container mx-auto px-6 text-center">
 			<p>&copy; 2025 Maragha. Made with ❤️ by <a href="https://almagazi.id">al-Magazi</a>.</p>
 		</div>

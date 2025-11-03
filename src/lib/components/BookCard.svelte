@@ -60,7 +60,7 @@
 			</div>
 			<div class="w-full bg-muted rounded-full h-2">
 				<div
-					class="bg-green-600 h-2 rounded-full transition-all duration-300"
+					class="bg-ribbon-500 h-2 rounded-full transition-all duration-300"
 					style="width: {calculateProgress(book)}%"
 				></div>
 			</div>
@@ -73,22 +73,22 @@
 			{#if book.kategori.length > 0}
 				<div class="flex flex-wrap gap-1">
 					{#each book.kategori.slice(0, 2) as kategori}
-						<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+						<span class="px-2 py-1 text-xs rounded-full bg-ribbon-100 text-ribbon-800">
 							{kategori}
 						</span>
 					{/each}
 					{#if book.kategori.length > 2}
-						<span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">
+						<span class="px-2 py-1 text-xs rounded-full bg-paper-100 text-paper-600">
 							+{book.kategori.length - 2}
 						</span>
 					{/if}
 				</div>
 			{:else}
-				<span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">
+				<span class="px-2 py-1 text-xs rounded-full bg-paper-100 text-paper-600">
 					Tidak ada kategori
 				</span>
 			{/if}
-			<span class="text-primary text-sm font-medium"> Baca → </span>
+			<span class="text-ribbon-600 text-sm font-medium"> Baca → </span>
 		</div>
 	</div>
 </button>

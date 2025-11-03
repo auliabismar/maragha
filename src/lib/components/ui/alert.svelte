@@ -13,8 +13,8 @@
 	let { variant = 'default', class: className, children, ...rest }: Props = $props();
 
 	const variantClasses = {
-		default: 'bg-background text-foreground',
-		destructive: 'border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive'
+		default: 'bg-paper-50 text-paper-900 border-paper-200',
+		destructive: 'border-ribbon-800/50 text-ribbon-900 dark:border-ribbon-800 [&>svg]:text-ribbon-800'
 	};
 </script>
 

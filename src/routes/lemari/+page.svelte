@@ -132,7 +132,7 @@
 		</div>
 	{:else if lemariRecords.length === 0}
 		<div class="text-center py-12">
-			<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
+			<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-paper-100 mb-4">
 				<svg class="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
 				</svg>
@@ -141,7 +141,7 @@
 			<p class="text-muted-foreground mb-6">Mulai membaca buku untuk menambahnya ke lemari buku Anda.</p>
 			<button 
 				onclick={goToHome}
-				class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+				class="px-4 py-2 bg-ribbon-600 text-white rounded-lg hover:bg-ribbon-700 transition-colors"
 			>
 				Telusuri Buku
 			</button>
@@ -149,8 +149,8 @@
 	{:else}
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 			{#each lemariRecords as record}
-				<div class="bg-card rounded-lg shadow-md overflow-hidden transition-all hover:shadow-lg">
-					<div class="relative h-48 bg-muted">
+				<div class="bg-paper-50 rounded-lg shadow-md overflow-hidden transition-all hover:shadow-lg">
+					<div class="relative h-48 bg-paper-100">
 						{#if record.book?.cover}
 							<img 
 								src={record.book.cover} 
@@ -158,7 +158,7 @@
 								class="absolute w-full h-full object-cover" 
 							/>
 						{:else}
-							<div class="flex items-center justify-center h-full bg-muted">
+							<div class="flex items-center justify-center h-full bg-paper-100">
 								<svg class="w-16 h-16 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
 									<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-5-5 1.41-1.41L11 14.17l7.59-7.59L20 8l-9 9z"/>
 								</svg>
@@ -194,14 +194,14 @@
 						<div class="mt-4 flex space-x-2">
 							<button 
 								onclick={() => continueReading(record)}
-								class="flex-1 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm font-medium text-center"
+								class="flex-1 px-3 py-2 bg-ribbon-600 text-white rounded-md hover:bg-ribbon-700 transition-colors text-sm font-medium text-center"
 							>
 								Lanjut Baca
 							</button>
 							
 							<button 
 								onclick={() => removeFromBookshelf(record.id)}
-								class="px-3 py-2 bg-muted text-muted-foreground rounded-md hover:bg-muted/80 transition-colors text-sm font-medium"
+								class="px-3 py-2 bg-paper-100 text-paper-600 rounded-md hover:bg-paper-200 transition-colors text-sm font-medium"
 								title="Hapus dari Lemari"
 							>
 								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

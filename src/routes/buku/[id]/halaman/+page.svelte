@@ -426,7 +426,7 @@ import { toast } from 'svelte-sonner';
 						<!-- Image Display Toggle Button -->
 						<button
 							onclick={toggleImages}
-							class="flex items-center gap-2 px-3 py-2 text-sm border border-border rounded-lg hover:bg-muted transition-colors"
+							class="flex items-center gap-2 px-3 py-2 text-sm border border-paper-300 rounded-lg hover:bg-paper-100 transition-colors"
 						>
 							{#if showImages}
 								<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -453,7 +453,7 @@ import { toast } from 'svelte-sonner';
 		{#if halamanRecords.length > 0}
 			<div class="space-y-6">
 				{#each halamanRecords as halaman}
-					<div class="bg-card rounded-lg shadow-md overflow-hidden">
+					<div class="bg-paper-50 rounded-lg shadow-md overflow-hidden">
 						<div class="p-6">
 							<div class="flex items-center justify-between mb-4">
 								<h3 class="text-lg font-semibold text-foreground">
@@ -462,7 +462,7 @@ import { toast } from 'svelte-sonner';
 								<button
 									onclick={openSuggestionDialog}
 									disabled={!isSuggestionEnabled}
-									class="px-3 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+									class="px-3 py-2 text-sm font-medium text-white bg-ribbon-600 rounded-lg hover:bg-ribbon-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 								>
 									Sarankan Review Terjemahan
 								</button>
@@ -472,7 +472,7 @@ import { toast } from 'svelte-sonner';
 							<div class="hidden lg:grid gap-6 {(showImages && hasScreenshots) ? 'lg:grid-cols-2' : 'lg:grid-cols-1'}">
 								<!-- Left Panel: Text (Terjemah) -->
 								<div
-									class="bg-muted/30 rounded-lg p-4 select-text"
+									class="bg-paper-100/30 rounded-lg p-4 select-text"
 									onmouseup={() => handleTextSelection(halaman)}
 									ontouchend={() => handleTextSelection(halaman)}
 									role="textbox"
@@ -488,7 +488,7 @@ import { toast } from 'svelte-sonner';
 								
 								{#if hasScreenshots && showImages}
 									<!-- Right Panel: Image -->
-									<div class="bg-muted/30 rounded-lg p-4">
+									<div class="bg-paper-100/30 rounded-lg p-4">
 										<h4 class="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
 											Gambar
 										</h4>
@@ -500,7 +500,7 @@ import { toast } from 'svelte-sonner';
 												style="aspect-ratio: auto;"
 											/>
 										{:else}
-											<div class="flex items-center justify-center h-48 bg-muted rounded-lg">
+											<div class="flex items-center justify-center h-48 bg-paper-100 rounded-lg">
 												<div class="text-center text-muted-foreground">
 													<svg class="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
 														<path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
@@ -517,7 +517,7 @@ import { toast } from 'svelte-sonner';
 							<div class="lg:hidden space-y-4">
 								<!-- Text Panel -->
 								<div
-									class="bg-muted/30 rounded-lg p-4 select-text"
+									class="bg-paper-100/30 rounded-lg p-4 select-text"
 									onmouseup={() => handleTextSelection(halaman)}
 									ontouchend={() => handleTextSelection(halaman)}
 									role="textbox"
@@ -533,7 +533,7 @@ import { toast } from 'svelte-sonner';
 								
 								{#if hasScreenshots && showImages}
 									<!-- Image Panel -->
-									<div class="bg-muted/30 rounded-lg p-4">
+									<div class="bg-paper-100/30 rounded-lg p-4">
 										<h4 class="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
 											Gambar
 										</h4>
@@ -545,7 +545,7 @@ import { toast } from 'svelte-sonner';
 												style="aspect-ratio: auto;"
 											/>
 										{:else}
-											<div class="flex items-center justify-center h-48 bg-muted rounded-lg">
+											<div class="flex items-center justify-center h-48 bg-paper-100 rounded-lg">
 												<div class="text-center text-muted-foreground">
 													<svg class="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
 														<path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
@@ -586,12 +586,12 @@ import { toast } from 'svelte-sonner';
 							onkeydown={handleJumpInputKeydown}
 							onblur={handleJumpInputBlur}
 							placeholder="1-{totalPages}"
-							class="w-20 px-2 py-1 text-sm text-center border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+							class="w-20 px-2 py-1 text-sm text-center border border-paper-300 rounded-md bg-paper-50 focus:outline-none focus:ring-2 focus:ring-ribbon-500 focus:border-transparent"
 						/>
 						<button
 							onclick={jumpToPage}
 							disabled={!jumpPageInput || isNaN(parseInt(jumpPageInput)) || parseInt(jumpPageInput) < 1 || parseInt(jumpPageInput) > totalPages}
-							class="px-3 py-1 text-xs font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+							class="px-3 py-1 text-xs font-medium text-white bg-ribbon-600 rounded-md hover:bg-ribbon-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
 							GO
 						</button>
@@ -604,7 +604,7 @@ import { toast } from 'svelte-sonner';
 							onclick={() => goToPage(1)}
 							disabled={currentPage === 1}
 							aria-label="Halaman pertama"
-							class="px-3 py-2 text-sm font-medium text-muted-foreground bg-card border border-border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+							class="px-3 py-2 text-sm font-medium text-paper-600 bg-paper-50 border border-paper-300 rounded-lg hover:bg-paper-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
 							{'<<'}
 						</button>
@@ -614,7 +614,7 @@ import { toast } from 'svelte-sonner';
 							onclick={() => goToPage(currentPage - 1)}
 							disabled={currentPage === 1}
 							aria-label="Halaman sebelumnya"
-							class="px-3 py-2 text-sm font-medium text-muted-foreground bg-card border border-border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+							class="px-3 py-2 text-sm font-medium text-paper-600 bg-paper-50 border border-paper-300 rounded-lg hover:bg-paper-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
 							{'<'}
 						</button>
@@ -628,8 +628,8 @@ import { toast } from 'svelte-sonner';
 									onclick={() => goToPage(page as number)}
 									class="px-3 py-2 text-sm font-medium rounded-lg transition-colors
 										{currentPage === page
-											? 'bg-primary text-primary-foreground'
-											: 'text-muted-foreground bg-card border border-border hover:bg-muted'}"
+											? 'bg-ribbon-600 text-white'
+											: 'text-paper-600 bg-paper-50 border border-paper-300 hover:bg-paper-100'}"
 								>
 									{page}
 								</button>
@@ -641,7 +641,7 @@ import { toast } from 'svelte-sonner';
 							onclick={() => goToPage(currentPage + 1)}
 							disabled={currentPage === totalPages}
 							aria-label="Halaman berikutnya"
-							class="px-3 py-2 text-sm font-medium text-muted-foreground bg-card border border-border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+							class="px-3 py-2 text-sm font-medium text-paper-600 bg-paper-50 border border-paper-300 rounded-lg hover:bg-paper-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
 							{'>'}
 						</button>
@@ -651,7 +651,7 @@ import { toast } from 'svelte-sonner';
 							onclick={() => goToPage(totalPages)}
 							disabled={currentPage === totalPages}
 							aria-label="Halaman terakhir"
-							class="px-3 py-2 text-sm font-medium text-muted-foreground bg-card border border-border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+							class="px-3 py-2 text-sm font-medium text-paper-600 bg-paper-50 border border-paper-300 rounded-lg hover:bg-paper-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
 							{'>>'}
 						</button>
@@ -670,7 +670,7 @@ import { toast } from 'svelte-sonner';
 	<!-- Translation Suggestion Dialog -->
 	{#if showSuggestionDialog}
 		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onclick={closeSuggestionDialog}>
-			<div class="bg-card rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" onclick={(e) => e.stopPropagation()}>
+			<div class="bg-paper-50 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" onclick={(e) => e.stopPropagation()}>
 				<div class="p-6">
 					<div class="flex items-center justify-between mb-4">
 						<h2 class="text-xl font-semibold text-foreground">Sarankan Review Terjemahan</h2>
@@ -698,7 +698,7 @@ import { toast } from 'svelte-sonner';
 								readonly
 								required
 								rows="3"
-								class="w-full px-3 py-2 text-sm border border-border rounded-md bg-muted cursor-not-allowed"
+								class="w-full px-3 py-2 text-sm border border-paper-300 rounded-md bg-paper-100 cursor-not-allowed"
 							></textarea>
 							<p class="text-xs text-muted-foreground mt-1">Teks ini diambil dari bagian yang Anda pilih</p>
 						</div>
@@ -715,7 +715,7 @@ import { toast } from 'svelte-sonner';
 								required
 								rows="4"
 								placeholder="Masukkan terjemahan baru yang Anda sarankan..."
-								class="w-full px-3 py-2 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+								class="w-full px-3 py-2 text-sm border border-paper-300 rounded-md bg-paper-50 focus:outline-none focus:ring-2 focus:ring-ribbon-500 focus:border-transparent"
 							></textarea>
 						</div>
 
@@ -731,7 +731,7 @@ import { toast } from 'svelte-sonner';
 								required
 								rows="3"
 								placeholder="Jelaskan alasan atau keterangan untuk saran ini..."
-								class="w-full px-3 py-2 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+								class="w-full px-3 py-2 text-sm border border-paper-300 rounded-md bg-paper-50 focus:outline-none focus:ring-2 focus:ring-ribbon-500 focus:border-transparent"
 							></textarea>
 						</div>
 
@@ -740,14 +740,14 @@ import { toast } from 'svelte-sonner';
 							<button
 								type="button"
 								onclick={closeSuggestionDialog}
-								class="px-4 py-2 text-sm font-medium text-muted-foreground bg-muted rounded-md hover:bg-muted/80 transition-colors"
+								class="px-4 py-2 text-sm font-medium text-paper-600 bg-paper-100 rounded-md hover:bg-paper-200 transition-colors"
 							>
 								Batal
 							</button>
 							<button
 								type="submit"
 								disabled={!selectedText.trim() || !terjemahanBaru.trim() || !alasanKeterangan.trim()}
-								class="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+								class="px-4 py-2 text-sm font-medium text-white bg-ribbon-600 rounded-md hover:bg-ribbon-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 							>
 								Kirim Saran
 							</button>

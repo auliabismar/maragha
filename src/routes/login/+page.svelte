@@ -29,7 +29,7 @@ import GoogleLoginButton from '$lib/components/GoogleLoginButton.svelte';
 </svelte:head>
 
 <div class="flex items-center justify-center min-h-screen">
-	<div class="w-full max-w-md p-8 space-y-6 bg-card rounded-lg shadow-lg">
+	<div class="w-full max-w-md p-8 space-y-6 bg-paper-50 rounded-lg shadow-lg">
 		<div class="flex justify-center">
 			<img src="/logo.svg" alt="Maragha Logo" class="h-16 w-16" />
 		</div>
@@ -40,7 +40,7 @@ import GoogleLoginButton from '$lib/components/GoogleLoginButton.svelte';
 					<div class="w-full border-t border-muted"></div>
 				</div>
 				<div class="relative flex justify-center text-sm">
-					<span class="bg-card px-2 text-muted-foreground">atau</span>
+					<span class="bg-paper-50 px-2 text-paper-600">atau</span>
 				</div>
 			</div>
 		</div>
@@ -74,7 +74,7 @@ import GoogleLoginButton from '$lib/components/GoogleLoginButton.svelte';
 			<button
 				type="submit"
 				disabled={loading}
-				class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
+				class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-ribbon-600 hover:bg-ribbon-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ribbon-500 disabled:opacity-50"
 			>
 				{#if loading}
 					Memuat...

@@ -36,13 +36,13 @@ function applyTheme(value: Theme) {
 	const resolved = getResolvedTheme(value);
 	const root = document.documentElement;
 	
+	// Update data-theme attribute for your layout
+	root.setAttribute('data-theme', resolved);
+
 	// Remove both classes first
 	root.classList.remove('light', 'dark');
 	// Add the resolved theme
 	root.classList.add(resolved);
-	
-	// Update data-theme attribute for your layout
-	root.setAttribute('data-theme', resolved);
 	
 	// Store preference
 	localStorage.setItem('theme', value);

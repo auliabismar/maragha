@@ -100,7 +100,7 @@
 
 <main class="container mx-auto px-6 py-8">
 		<!-- Hero Section -->
-		<section class="relative bg-gradient-to-br from-[#F3EFE0] to-[#E8E4D0] py-16 px-6 rounded-2xl mb-12 border border-[#D4A856]/20">
+		<section class="relative bg-gradient-to-br from-[var(--maragha-background)] to-[color-mix(in_srgb,_var(--maragha-background)_85%,_black)] py-16 px-6 rounded-2xl mb-12 border border-[var(--maragha-gold)]/20">
 			<!-- Background Pattern -->
 			<div class="absolute inset-0 opacity-5">
 				<svg class="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -147,8 +147,8 @@
 					</a>
 					<a
 						href="/buku"
-						class="bg-transparent border-2 border-[#D4A856] text-[#D4A856] px-8 py-4
-							   rounded-xl font-semibold text-lg hover:bg-[#D4A856] hover:text-white
+						class="bg-transparent border-2 border-[var(--maragha-gold)] text-[var(--maragha-gold)] px-8 py-4
+							   rounded-xl font-semibold text-lg hover:bg-[var(--maragha-gold)] hover:text-white
 							   transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
 					>
 						📚 Jelajahi Koleksi
