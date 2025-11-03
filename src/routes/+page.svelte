@@ -144,7 +144,7 @@
         selama berabad-abad.
       </p>
 
-      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+      <!--<div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
         <a
           href="/register"
           class="bg-[#29477B] text-white px-8 py-4 rounded-xl font-semibold text-lg
@@ -178,7 +178,7 @@
           <div class="text-3xl font-bold text-[#64463C] mb-2">50+</div>
           <div class="text-[#64463C] font-medium">Editor Profesional</div>
         </div>
-      </div>
+      </div>-->
     </div>
 
     <div class="absolute top-4 right-4 text-[#D4A856] opacity-20">
