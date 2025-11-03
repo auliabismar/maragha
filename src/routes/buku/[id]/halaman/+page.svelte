@@ -58,7 +58,7 @@ import { toast } from 'svelte-sonner';
 		}
 
 		if (!bookId) {
-			goto('/dashboard');
+			goto('/');
 			return;
 		}
 
@@ -132,7 +132,7 @@ import { toast } from 'svelte-sonner';
 			};
 		} catch (error) {
 			console.error('Error fetching book:', error);
-			goto('/dashboard');
+			goto('/');
 		}
 	}
 
@@ -286,7 +286,7 @@ import { toast } from 'svelte-sonner';
 	}
 
 	function goBack() {
-		goto('/dashboard');
+		goto('/lemari');
 	}
 
 	function goToPreviousPage() {
@@ -405,7 +405,7 @@ import { toast } from 'svelte-sonner';
 				<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
 				</svg>
-				Kembali ke Dashboard
+				Kembali ke lemari buku
 			</button>
 			
 			<div class="flex flex-col md:flex-row md:items-center md:justify-between">

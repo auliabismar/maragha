@@ -14,7 +14,7 @@ import GoogleLoginButton from '$lib/components/GoogleLoginButton.svelte';
 		try {
 			await pb.collection('users').authWithPassword(email, password);
 			// Redirect to dashboard or home page on successful login
-			goto('/dashboard');
+			goto('/');
 		} catch (err: any) {
 			error = err.message || 'An unknown error occurred during login.';
 		} finally {

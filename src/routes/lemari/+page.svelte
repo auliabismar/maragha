@@ -83,8 +83,8 @@
 		}
 	}
 
-	function goToDashboard() {
-		goto('/dashboard');
+	function goToHome() {
+		goto('/');
 	}
 
 	function continueReading(lemariRecord: LemariRecord) {
@@ -108,13 +108,13 @@
 	<!-- Header -->
 	<div class="mb-8">
 		<button 
-			onclick={goToDashboard}
+			onclick={goToHome}
 			class="inline-flex items-center text-primary hover:text-accent mb-4 transition-colors"
 		>
 			<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
 			</svg>
-			Kembali ke Dashboard
+			Kembali ke Beranda
 		</button>
 		
 		<h1 class="text-3xl font-heading font-bold text-foreground">Lemari Buku Saya</h1>
@@ -140,7 +140,7 @@
 			<h2 class="text-xl font-semibold mb-2">Belum ada buku di lemari</h2>
 			<p class="text-muted-foreground mb-6">Mulai membaca buku untuk menambahnya ke lemari buku Anda.</p>
 			<button 
-				onclick={goToDashboard}
+				onclick={goToHome}
 				class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
 			>
 				Telusuri Buku

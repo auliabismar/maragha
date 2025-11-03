@@ -26,7 +26,7 @@
 			const user = pb.authStore.model;
 			if (!user || (user.role !== 'Editor' && user.role !== 'Penerjemah')) {
 				// Redirect to dashboard if user doesn't have proper role
-				goto('/dashboard');
+				goto('/');
 				return;
 			}
 			userEmail = user.email;

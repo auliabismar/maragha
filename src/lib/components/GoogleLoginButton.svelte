@@ -22,7 +22,7 @@
 
 			// Authentication was successful
 			// Redirect to dashboard or previous page
-			goto('/dashboard');
+			goto('/');
 		} catch (err: any) {
 			error = err.message || 'An error occurred during authentication.';
 			console.error('OAuth2 error:', err);
