@@ -170,7 +170,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {#each lemariRecords as record}
         <div
-          class="bg-[var(--color-paper-50)] rounded-lg shadow-md overflow-hidden transition-all hover:shadow-lg"
+          class="bg-[var(--card)] rounded-lg shadow-md overflow-hidden transition-all hover:shadow-lg"
         >
           <div class="relative h-48 bg-[var(--color-paper-100)]">
             {#if record.book?.cover}
@@ -195,7 +195,7 @@
           </div>
 
           <div class="p-4">
-            <h3 class="font-semibold text-lg text-[var(--foreground)] truncate">
+            <h3 class="font-semibold text-lg text-[var(--muted-foreground)] truncate">
               {record.book?.judul}
             </h3>
             <div class="flex items-center justify-between mt-1 text-xs text-[var(--muted-foreground)]">

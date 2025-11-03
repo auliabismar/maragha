@@ -167,6 +167,7 @@
                 onclick={closeMobileMenu}>Lemari Buku</a
               >
             {/if}
+            {JSON.stringify(user)}
             {#if user && (user.role === 'Editor' || user.role === 'Penerjemah')}
               <a
                 href="/penugasan"
