@@ -215,7 +215,11 @@
 
   .terjemah-content blockquote p {
     color: var(--muted-foreground);
-    margin: 0;
+  }
+
+  .terjemah-content blockquote br {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
   }
 
   .terjemah-content a {
