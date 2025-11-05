@@ -43,14 +43,16 @@
 		<p class="text-sm text-[var(--muted-foreground)] mb-1">
 			Penulis: {book.penulis.join(', ')}
 		</p>
-		{#if book.kategori.length > 0}
+		<!-- {#if book.kategori.length > 0}
 			<p class="text-sm text-[var(--muted-foreground)] mb-1">
 				Kategori: {book.kategori.join(', ')}
 			</p>
-		{/if}
+		{/if} -->
+		{#if book.penerbit && book.penerbit != 'N/A'} 
 		<p class="text-sm text-[var(--muted-foreground)] mb-3">
 			Penerbit: {book.penerbit}
 		</p>
+		{/if}
 
 		<!-- Progress Bar -->
 		<div class="mb-3">
