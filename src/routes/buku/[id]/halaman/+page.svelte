@@ -20,6 +20,7 @@
     id: string;
     halaman: number;
     terjemah: string;
+    tulisan?: string;
     image?: string;
     buku: string;
     status?: string;
@@ -42,7 +43,15 @@
   let alasanKeterangan = $state('');
   let selectedHalamanId = $state<string>('');
   let selectedHalamanNo = $state<number>(0);
+
+  // Editor mode state
+  let isEditorMode = $state(false);
+  let editData = $state<{[key: string]: {terjemah: string, tulisan: string}}>({});
   let cleanup: (() => void) | undefined;
+  let imageHeight = $state(0);
+  let imageRef: HTMLImageElement | null = null;
+  let terjemahHeight = $state(0);
+  let terjemahRef: HTMLDivElement | null = null;
 
   // AbortController for fetchHalaman requests
   let abortController: AbortController | null = null;
@@ -152,6 +161,7 @@
         id: record.id,
         halaman: record.halaman,
         terjemah: record.terjemah,
+        tulisan: record.tulisan || '',
         image: record.image ? pb.files.getURL(record, record.image) : undefined,
         status: record.status,
         buku: record.buku
@@ -353,6 +363,23 @@
   const hasScreenshots = $derived(book?.screenshot === true);
   // Check if button should be enabled
   const isSuggestionEnabled = $derived(selectedText.trim().length > 0);
+  // Check if current user is Editor
+  const isEditor = $derived(pb.authStore.model?.akses === 'Editor');
+
+  // Initialize edit data when halamanRecords change
+  $effect(() => {
+    if (halamanRecords.length > 0 && isEditorMode) {
+      halamanRecords.forEach(halaman => {
+        if (!editData[halaman.id]) {
+          editData[halaman.id] = {
+            terjemah: halaman.terjemah,
+            tulisan: halaman.tulisan || ''
+          };
+        }
+      });
+    }
+  });
+
   // Cleanup on component destroy
   $effect(() => {
     return () => {
@@ -367,6 +394,66 @@
       fetchHalaman();
     }
   });
+
+  $effect(() => {
+    if (imageRef && showImages && hasScreenshots) {
+      const observer = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          if (entry.target === imageRef) {
+            imageHeight = entry.contentRect.height;
+          }
+        }
+      });
+      observer.observe(imageRef);
+
+      return () => {
+        observer.disconnect();
+      };
+    } else {
+      imageHeight = 0; // Reset height if image is not shown
+    }
+  });
+
+
+
+  function toggleEditMode() {
+    isEditorMode = !isEditorMode;
+    if (!isEditorMode) {
+      // Clear edit data when exiting edit mode
+      editData = {};
+    }
+  }
+
+  function handleEditChange(halamanId: string, field: 'terjemah' | 'tulisan', value: string) {
+    if (!editData[halamanId]) {
+      editData[halamanId] = { terjemah: '', tulisan: '' };
+    }
+    editData[halamanId][field] = value;
+  }
+
+  async function saveChanges(halamanId: string) {
+    const data = editData[halamanId];
+    if (!data) return;
+
+    try {
+      await pb.collection('halaman').update(halamanId, {
+        terjemah: data.terjemah,
+        tulisan: data.tulisan
+      });
+
+      // Update local state
+      const halamanIndex = halamanRecords.findIndex(h => h.id === halamanId);
+      if (halamanIndex >= 0) {
+        halamanRecords[halamanIndex].terjemah = data.terjemah;
+        halamanRecords[halamanIndex].tulisan = data.tulisan || '';
+      }
+
+      toast.success('Perubahan berhasil disimpan!');
+    } catch (error) {
+      console.error('Error saving changes:', error);
+      toast.error('Terjadi kesalahan saat menyimpan perubahan.');
+    }
+  }
 </script>
 
 <svelte:head>
@@ -460,127 +547,260 @@
                 <h3 class="text-lg font-semibold text-[var(--foreground)]">
                   Halaman {halaman.halaman}
                 </h3>
-                <button
-                  onclick={openSuggestionDialog}
-                  disabled={!isSuggestionEnabled}
-                  class="px-3 py-2 text-sm font-medium text-[var(--primary-foreground)] bg-[var(--primary)] rounded-lg hover:bg-[var(--primary)]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  Sarankan Review Terjemahan
-                </button>
-              </div>
-
-              <div
-                class="hidden lg:grid gap-6 {showImages && hasScreenshots
-                  ? 'lg:grid-cols-2'
-                  : 'lg:grid-cols-1'}"
-              >
-                <div
-                  class="bg-[var(--accent)]/50 rounded-lg p-4 select-text"
-                  onmouseup={() => handleTextSelection(halaman)}
-                  ontouchend={() => handleTextSelection(halaman)}
-                  role="textbox"
-                  tabindex="0"
-                >
-                  <h4
-                    class="text-sm font-medium text-[var(--muted-foreground)] mb-3 uppercase tracking-wide"
-                  >
-                    Terjemah
-                  </h4>
-                  <div class="terjemah-content max-w-none leading-relaxed">
-                    {@html halaman.terjemah}
-                  </div>
-                </div>
-
-                {#if hasScreenshots && showImages}
-                  <div class="bg-[var(--accent)]/50 rounded-lg p-4">
-                    <h4
-                      class="text-sm font-medium text-[var(--muted-foreground)] mb-3 uppercase tracking-wide"
+                <div class="flex items-center gap-2">
+                  {#if isEditor}
+                    <button
+                      onclick={toggleEditMode}
+                      class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {isEditorMode
+                        ? 'text-[var(--primary-foreground)] bg-[var(--primary)] hover:bg-[var(--primary)]/90'
+                        : 'text-[var(--muted-foreground)] bg-[var(--accent)] hover:bg-[var(--muted)]'}"
                     >
-                      Gambar
-                    </h4>
-                    {#if halaman.image}
-                      <img
-                        src={halaman.image}
-                        alt="Halaman {halaman.halaman}"
-                        class="w-full h-auto rounded-lg shadow-sm object-contain"
-                        style="aspect-ratio: auto;"
-                      />
-                    {:else}
-                      <div
-                        class="flex items-center justify-center h-48 bg-[var(--accent)] rounded-lg"
-                      >
-                        <div class="text-center text-[var(--muted-foreground)]">
-                          <svg
-                            class="w-12 h-12 mx-auto mb-2"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"
-                            />
-                          </svg>
-                          <p class="text-sm">Tidak ada gambar</p>
-                        </div>
-                      </div>
-                    {/if}
-                  </div>
-                {/if}
-              </div>
-
-              <div class="lg:hidden space-y-4">
-                <div
-                  class="bg-[var(--accent)]/50 rounded-lg p-4 select-text"
-                  onmouseup={() => handleTextSelection(halaman)}
-                  ontouchend={() => handleTextSelection(halaman)}
-                  role="textbox"
-                  tabindex="0"
-                >
-                  <h4
-                    class="text-sm font-medium text-[var(--muted-foreground)] mb-3 uppercase tracking-wide"
+                      {#if isEditorMode}
+                        <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Selesai Edit
+                      {:else}
+                        <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Edit
+                      {/if}
+                    </button>
+                  {/if}
+                  <button
+                    onclick={openSuggestionDialog}
+                    disabled={!isSuggestionEnabled || isEditorMode}
+                    class="px-3 py-2 text-sm font-medium text-[var(--primary-foreground)] bg-[var(--primary)] rounded-lg hover:bg-[var(--primary)]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    Terjemah
-                  </h4>
-                  <div class="terjemah-content max-w-none leading-relaxed">
-                    {@html halaman.terjemah}
-                  </div>
+                    Sarankan Review Terjemahan
+                  </button>
                 </div>
-
-                {#if hasScreenshots && showImages}
-                  <div class="bg-[var(--accent)]/50 rounded-lg p-4">
-                    <h4
-                      class="text-sm font-medium text-[var(--muted-foreground)] mb-3 uppercase tracking-wide"
-                    >
-                      Gambar
-                    </h4>
-                    {#if halaman.image}
-                      <img
-                        src={halaman.image}
-                        alt="Halaman {halaman.halaman}"
-                        class="w-full h-auto rounded-lg shadow-sm object-contain"
-                        style="aspect-ratio: auto;"
-                      />
-                    {:else}
-                      <div
-                        class="flex items-center justify-center h-48 bg-[var(--accent)] rounded-lg"
-                      >
-                        <div class="text-center text-[var(--muted-foreground)]">
-                          <svg
-                            class="w-12 h-12 mx-auto mb-2"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"
-                            />
-                          </svg>
-                          <p class="text-sm">Tidak ada gambar</p>
-                        </div>
-                      </div>
-                    {/if}
-                  </div>
-                {/if}
               </div>
-            </div>
+
+<div
+  class="hidden lg:grid gap-6 {showImages && hasScreenshots && halaman.image
+    ? 'lg:grid-cols-2'
+    : !halaman.image 
+    ? 'lg:grid-cols-2' 
+    : 'lg:grid-cols-1'}"
+>
+  {#if isEditorMode && isEditor}
+    <!-- Edit Mode: Terjemah -->
+    <div class="bg-[var(--accent)]/50 rounded-lg p-4">
+      <h4
+        class="text-sm font-medium text-[var(--muted-foreground)] mb-3 uppercase tracking-wide"
+      >
+        Terjemah
+      </h4>
+      <textarea
+        value={editData[halaman.id]?.terjemah || halaman.terjemah}
+        oninput={(e) => handleEditChange(halaman.id, 'terjemah', e.currentTarget.value)}
+        class="w-full px-3 py-2 text-sm border border-[var(--border)] rounded-md bg-[var(--background)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent resize-y"
+        placeholder="Masukkan terjemahan..."
+        style="min-height: {imageHeight > 0 && showImages && hasScreenshots ? `${imageHeight}px` : '1000px'};"
+      ></textarea>
+      <div class="flex justify-end mt-2">
+        <button
+          onclick={() => saveChanges(halaman.id)}
+          class="px-3 py-1 text-xs font-medium text-[var(--primary-foreground)] bg-[var(--primary)] rounded-md hover:bg-[var(--primary)]/90 transition-colors"
+        >
+          Simpan
+        </button>
+      </div>
+    </div>
+
+    <!-- Edit Mode: Tulisan (only show if no image) -->
+    {#if !halaman.image}
+      <div class="bg-[var(--accent)]/50 rounded-lg p-4">
+        <h4 class="text-sm font-medium text-[var(--muted-foreground)] mb-3 uppercase tracking-wide">
+          Tulisan
+        </h4>
+        <div 
+          class="w-full px-3 py-2 text-sm border border-[var(--border)] rounded-md bg-[var(--muted)]/50 text-[var(--muted-foreground)] overflow-y-auto whitespace-pre-wrap" 
+          style="min-height: {imageHeight > 0 && showImages && hasScreenshots ? `${imageHeight}px` : '1000px'};"
+        >
+          {editData[halaman.id]?.tulisan || halaman.tulisan || 'Tidak ada tulisan'}
+        </div>
+      </div>
+    {/if}
+  {:else}
+    <!-- View Mode: Terjemah -->
+    <div
+      class="bg-[var(--accent)]/50 rounded-lg p-4 select-text"
+      onmouseup={() => handleTextSelection(halaman)}
+      ontouchend={() => handleTextSelection(halaman)}
+      role="textbox"
+      tabindex="0"
+    >
+      <h4
+        class="text-sm font-medium text-[var(--muted-foreground)] mb-3 uppercase tracking-wide"
+      >
+        Terjemah
+      </h4>
+      <div class="terjemah-content max-w-none leading-relaxed">
+        {@html halaman.terjemah}
+      </div>
+    </div>
+
+    <!-- View Mode: Tulisan (only show if no image) -->
+    {#if !halaman.image}
+      <div class="bg-[var(--accent)]/50 rounded-lg p-4">
+        <h4
+          class="text-sm font-medium text-[var(--muted-foreground)] mb-3 uppercase tracking-wide"
+        >
+          Tulisan
+        </h4>
+        <div class="tulisan-content max-w-none leading-relaxed whitespace-pre-wrap">
+          {@html halaman.tulisan || 'Tidak ada tulisan asli.'}
+        </div>
+      </div>
+    {/if}
+  {/if}
+
+  <!-- Image box for desktop - shows when screenshot is enabled AND image exists -->
+  {#if hasScreenshots && halaman.image}
+    <div class="bg-[var(--accent)]/50 rounded-lg p-4">
+      <h4
+        class="text-sm font-medium text-[var(--muted-foreground)] mb-3 uppercase tracking-wide"
+      >
+        Gambar
+      </h4>
+      {#if showImages}
+        <img
+          bind:this={imageRef}
+          src={halaman.image}
+          alt="Halaman {halaman.halaman}"
+          class="w-full h-auto rounded-lg shadow-sm object-contain"
+          style="aspect-ratio: auto;"
+        />
+      {:else}
+        <div
+          class="flex items-center justify-center h-48 bg-[var(--accent)] rounded-lg"
+        >
+          <div class="text-center text-[var(--muted-foreground)]">
+            <svg
+              class="w-12 h-12 mx-auto mb-2"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"
+              />
+            </svg>
+            <p class="text-sm">Gambar disembunyikan</p>
+          </div>
+        </div>
+      {/if}
+    </div>
+  {/if}
+</div>
+<div class="lg:hidden space-y-4">
+  {#if isEditorMode && isEditor}
+    <!-- Mobile Edit Mode: Stack vertically -->
+    <div class="space-y-4">
+      <!-- Terjemah Edit -->
+      <div class="bg-[var(--accent)]/50 rounded-lg p-4">
+        <h4
+          class="text-sm font-medium text-[var(--muted-foreground)] mb-3 uppercase tracking-wide"
+        >
+          Terjemah
+        </h4>
+        <textarea
+          value={editData[halaman.id]?.terjemah || halaman.terjemah}
+          oninput={(e) => handleEditChange(halaman.id, 'terjemah', e.currentTarget.value)}
+          class="w-full px-3 py-2 text-sm border border-[var(--border)] rounded-md bg-[var(--background)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent resize-y"
+          placeholder="Masukkan terjemahan..."
+          style="min-height: {terjemahHeight > 0 ? `${terjemahHeight}px` : '1000px'};"
+        ></textarea>
+        <div class="flex justify-end mt-2">
+          <button
+            onclick={() => saveChanges(halaman.id)}
+            class="px-3 py-1 text-xs font-medium text-[var(--primary-foreground)] bg-[var(--primary)] rounded-md hover:bg-[var(--primary)]/90 transition-colors"
+          >
+            Simpan
+          </button>
+        </div>
+      </div>
+
+      <!-- Tulisan Edit (only show if no image) -->
+      {#if !halaman.image}
+        <div class="bg-[var(--accent)]/50 rounded-lg p-4">
+          <h4
+            class="text-sm font-medium text-[var(--muted-foreground)] mb-3 uppercase tracking-wide"
+          >
+            Tulisan
+          </h4>
+          <textarea
+            value={editData[halaman.id]?.tulisan || halaman.tulisan || ''}
+            oninput={(e) => handleEditChange(halaman.id, 'tulisan', e.currentTarget.value)}
+            class="w-full px-3 py-2 text-sm border border-[var(--border)] rounded-md bg-[var(--background)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent resize-y"
+            placeholder="Masukkan tulisan asli..."
+            style="min-height: {terjemahHeight > 0 ? `${terjemahHeight}px` : '1000px'};"
+          ></textarea>
+          <div class="flex justify-end mt-2">
+            <button
+              onclick={() => saveChanges(halaman.id)}
+              class="px-3 py-1 text-xs font-medium text-[var(--primary-foreground)] bg-[var(--primary)] rounded-md hover:bg-[var(--primary)]/90 transition-colors"
+            >
+              Simpan
+            </button>
+          </div>
+        </div>
+      {/if}
+    </div>
+  {:else}
+    <!-- Mobile View Mode -->
+    <div
+      bind:this={terjemahRef}
+      class="bg-[var(--accent)]/50 rounded-lg p-4 select-text"
+      onmouseup={() => handleTextSelection(halaman)}
+      ontouchend={() => handleTextSelection(halaman)}
+      role="textbox"
+      tabindex="0"
+    >
+      <h4
+        class="text-sm font-medium text-[var(--muted-foreground)] mb-3 uppercase tracking-wide"
+      >
+        Terjemah
+      </h4>
+      <div class="terjemah-content max-w-none leading-relaxed">
+        {@html halaman.terjemah}
+      </div>
+    </div>
+
+    {#if hasScreenshots && halaman.image && showImages}
+      <!-- Image box for mobile (hide tulisan when image exists) -->
+      <div class="bg-[var(--accent)]/50 rounded-lg p-4">
+        <h4
+          class="text-sm font-medium text-[var(--muted-foreground)] mb-3 uppercase tracking-wide"
+        >
+          Gambar
+        </h4>
+        <img
+          bind:this={imageRef}
+          src={halaman.image}
+          alt="Halaman {halaman.halaman}"
+          class="w-full h-auto rounded-lg shadow-sm object-contain"
+          style="aspect-ratio: auto;"
+        />
+      </div>
+    {:else if !halaman.image}
+      <!-- Tulisan box for mobile (only show when NO image) -->
+      <div class="bg-[var(--accent)]/50 rounded-lg p-4">
+        <h4
+          class="text-sm font-medium text-[var(--muted-foreground)] mb-3 uppercase tracking-wide"
+        >
+          Tulisan
+        </h4>
+        <div class="tulisan-content max-w-none leading-relaxed whitespace-pre-wrap"
+             style="min-height: {terjemahHeight > 0 ? `${terjemahHeight}px` : '1000px'};">
+          {@html halaman.tulisan || 'Tidak ada tulisan asli.'}
+        </div>
+      </div>
+    {/if}
+  {/if}
+</div>            </div>
           </div>
         {/each}
       </div>
