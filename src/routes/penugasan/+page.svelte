@@ -16,7 +16,7 @@
 
   let assignments = $state<Assignment[]>([]);
   let filteredAssignments = $state<Assignment[]>([]);
-  let selectedStatus = $state<string>('all');
+  let selectedStatus = $state<string>('Terlapor');
   let searchQuery = $state<string>('');
   let userEmail = $state<string | null>(null);
 
