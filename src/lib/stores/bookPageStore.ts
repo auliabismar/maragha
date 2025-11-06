@@ -71,10 +71,12 @@ export function toggleImages() {
 }
 
 async function fetchBook(bookId: string) {
+	console.log('Fetching book with ID:', bookId);
 	try {
 		const record = await pb.collection('buku').getOne(bookId, {
 			expand: 'penulis,penerbit,kategori'
 		});
+		console.log('Book record fetched:', record);
 
 		const bookData: Book = {
 			id: record.id,
@@ -95,6 +97,7 @@ async function fetchBook(bookId: string) {
 }
 
 async function fetchHalaman(bookId: string) {
+	console.log('Fetching halaman for book ID:', bookId);
 	// Abort previous request if any
 	if (abortController) {
 		abortController.abort();
@@ -106,11 +109,12 @@ async function fetchHalaman(bookId: string) {
 		const itemsPerPageValue = getItemsPerPage();
 		
 		const records = await pb.collection('halaman').getList(currentPageValue, itemsPerPageValue, {
-			filter: `buku = "${bookId}" && status != "Draft"`,
+			filter: `buku = "${bookId}"`,
 			sort: 'halaman',
 			expand: 'buku',
 			signal: abortController.signal
 		});
+		console.log('Halaman records fetched:', records);
 
 		const halamanData: Halaman[] = records.items.map((record) => ({
 			id: record.id,
