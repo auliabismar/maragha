@@ -57,7 +57,7 @@
 		<!-- Progress Bar -->
 		<div class="mb-3">
 			<div class="flex items-center justify-between mb-1">
-				<span class="text-sm text-[var(--muted-foreground)]">Progress Terjemahan</span>
+				<span class="text-sm text-[var(--muted-foreground)]">Progres Penerjemahan</span>
 				<span class="text-sm font-medium text-[var(--foreground)]">{calculateProgress(book)}%</span>
 			</div>
 			<div class="w-full bg-[var(--muted)] rounded-full h-2">
