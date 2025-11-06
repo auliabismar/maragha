@@ -2,6 +2,7 @@
   import { goto } from '$app/navigation';
   import pb from '$lib/pocketbase';
   import GoogleLoginButton from '$lib/components/GoogleLoginButton.svelte';
+  import GithubLoginButton from '$lib/components/GithubLoginButton.svelte';
 
   let email = $state<string>('');
   let password = $state<string>('');
@@ -37,6 +38,7 @@
     </div>
     <div class="space-y-4">
       <GoogleLoginButton />
+      <GithubLoginButton />
       <div class="relative">
         <div class="absolute inset-0 flex items-center">
           <div class="w-full border-t border-[var(--muted)]"></div>
