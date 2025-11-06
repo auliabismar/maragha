@@ -114,6 +114,15 @@ import RichTextEditor from '$lib/components/RichTextEditor.svelte';
 			imageHeight = 0;
 		}
 	});
+
+	$effect(() => {
+		if (halaman.id) {
+			const terjemahBox = document.getElementById('terjemah-box');
+			if (terjemahBox) {
+				terjemahBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			}
+		}
+	});
 </script>
 
 <div class="relative">
@@ -134,6 +143,7 @@ import RichTextEditor from '$lib/components/RichTextEditor.svelte';
 
 		<div class="{showImagesValue && $hasScreenshots && halaman.image ? 'lg:w-1/2' : 'w-full'}">
 			<div
+				id="terjemah-box"
 				class="bg-[var(--card)] rounded-lg p-6 shadow-sm border border-[var(--border)]"
 				role="textbox"
 				tabindex="0"
