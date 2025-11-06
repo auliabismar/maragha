@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import pb from '$lib/pocketbase';
   import BookCard from '$lib/components/BookCard.svelte';
+  import TelegramIcon from '$lib/components/TelegramIcon.svelte';
 
   interface Book {
     id: string;
@@ -144,26 +145,26 @@
         selama berabad-abad.
       </p>
 
-      <!--<div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+      <div class="inline-flex sm:flex-row gap-4 justify-center items-center mb-8">
         <a
-          href="/register"
-          class="bg-[#29477B] text-white px-8 py-4 rounded-xl font-semibold text-lg
-							   hover:bg-[#1e3658] transition-all duration-300 shadow-lg hover:shadow-xl
-							   transform hover:-translate-y-1"
+          href="https://t.me/+I0dP61OBmSEyZTk1"
+          class="inline-flex items-center bg-[#29477B] text-white px-8 py-4 rounded-xl font-semibold text-lg
+          hover:bg-[#1e3658] transition-all duration-300 shadow-lg hover:shadow-xl
+          transform hover:-translate-y-1"
         >
-          🚀 Mulai Menerjemahkan
+          <TelegramIcon classNames="mr-2" size="20" /> Mulai Kontribusi
         </a>
-        <a
+        <!-- <a
           href="/buku"
           class="bg-transparent border-2 border-[var(--maragha-gold)] text-[var(--maragha-gold)] px-8 py-4
 							   rounded-xl font-semibold text-lg hover:bg-[var(--maragha-gold)] hover:text-white
 							   transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
         >
           📚 Jelajahi Koleksi
-        </a>
+        </a> -->
       </div>
 
-      <div
+      <!-- <div
         class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 pt-8 border-t border-[#D4A856]/30"
       >
         <div class="text-center">
@@ -178,7 +179,7 @@
           <div class="text-3xl font-bold text-[#64463C] mb-2">50+</div>
           <div class="text-[#64463C] font-medium">Editor Profesional</div>
         </div>
-      </div>-->
+      </div> -->
     </div>
 
     <div class="absolute top-4 right-4 text-[#D4A856] opacity-20">

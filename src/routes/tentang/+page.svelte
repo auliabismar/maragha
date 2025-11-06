@@ -6,6 +6,10 @@
   />
 </svelte:head>
 
+<script lang="ts">
+  import TelegramIcon from '$lib/components/TelegramIcon.svelte';
+</script>
+
 <div
   class="container mx-auto max-w-4xl px-4 py-8 text-[var(--foreground)]"
   style="line-height: 1.7;"
@@ -128,9 +132,10 @@
     </p>
     <div class="mt-8">
       <a
-        href="/register"
-        class="inline-block rounded-lg bg-[var(--primary)] px-6 py-3 text-lg font-medium text-[var(--primary-foreground)] shadow transition-colors hover:bg-[var(--primary)]/90"
+        href="https://t.me/+I0dP61OBmSEyZTk1"
+        class="inline-flex items-center rounded-lg bg-[var(--primary)] px-6 py-3 text-lg font-medium text-[var(--primary-foreground)] shadow transition-colors hover:bg-[var(--primary)]/90"
       >
+        <TelegramIcon classNames="mr-2" size="20" />
         Mulai Berkontribusi
       </a>
     </div>
