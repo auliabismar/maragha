@@ -13,13 +13,16 @@
     error = null;
     try {
       if (password !== passwordConfirm) {
-        throw new Error('Passwords do not match.');
+        throw new Error('Password dan Konfirmasi Password tidak sesuai.');
+      } else if (password.length < 8) {
+        throw new Error('Password terlalu pendek. Harap gunakan minimal 8 karakter.');
       }
 
       await pb.collection('users').create({
         email,
         password,
-        passwordConfirm
+        passwordConfirm,
+        akses: 'Pembaca'
       });
 
       // Optionally, log in the user immediately after registration
@@ -27,7 +30,18 @@
       // Redirect to dashboard or home page on successful registration and login
       goto('/');
     } catch (err: any) {
-      error = err.message || 'An unknown error occurred during registration.';
+      let errorMessage = '';
+      console.log(err);
+      if (err?.data?.data?.email?.message && err?.data?.data?.email?.message.includes('Value must be unique.')) {
+        errorMessage = 'Email sudah terdaftar. Silakan gunakan email lain atau masuk.';
+      } else if (err?.data?.data?.password?.message && err?.data?.data?.password?.message.includes('must be at least')) {
+        errorMessage = 'Password terlalu pendek. Harap gunakan minimal 8 karakter.';
+      } else if (err?.data?.data?.password?.message && err?.data?.data?.password?.message.includes('do not match')) {
+        errorMessage = 'Password dan Konfirmasi Password tidak sesuai.';
+      } else {
+        errorMessage = err?.message;// || err?.data?.data?.password?.message || err?.data?.data?.email?.message || err?.message || 'An unknown error occurred during registration.';
+      }
+      error = errorMessage || 'An unknown error occurred during registration.';
     } finally {
       loading = false;
     }
