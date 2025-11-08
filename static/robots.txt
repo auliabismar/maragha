@@ -1,3 +1,37 @@
-# allow crawling everything by default
+# Robots.txt for Maragha - Platform Warisan Intelektual Islam
+# https://maragha.example.com/robots.txt
+
+# Allow all search engine crawlers by default
 User-agent: *
-Disallow:
+Allow: /
+
+# Sitemap location
+Sitemap: https://maragha.example.com/sitemap.xml
+
+# Disallow crawling of admin and auth-related pages
+User-agent: *
+Disallow: /auth/
+Disallow: /login/
+Disallow: /register/
+Disallow: /oauth2/
+Disallow: /profile/
+Disallow: /penugasan/
+
+# Allow crawling of public content
+User-agent: *
+Allow: /buku/
+Allow: /lemari/
+Allow: /tentang/
+
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Crawl delay for all bots (optional, use if needed)
+# Crawl-delay: 1

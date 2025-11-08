@@ -3,6 +3,7 @@
   import pb from '$lib/pocketbase';
   import BookCard from '$lib/components/BookCard.svelte';
   import TelegramIcon from '$lib/components/TelegramIcon.svelte';
+  import SEO from '$lib/components/SEO.svelte';
 
   interface Book {
     id: string;
@@ -91,13 +92,13 @@
   }
 </script>
 
-<svelte:head>
-  <title>Maragha - Merawat Warisan Intelektual Islam</title>
-  <meta
-    name="description"
-    content="Maragha: Platform perpustakaan digital untuk buku-buku klasik Arab yang telah diterjemahkan dan crowd sourcing terjemahan untuk melestarikan khazanah intelektual Islam."
-  />
-</svelte:head>
+<SEO
+  title="Maragha - Merawat Warisan Intelektual Islam"
+  description="Maragha: Platform perpustakaan digital untuk buku-buku klasik Arab yang telah diterjemahkan dan crowd sourcing terjemahan untuk melestarikan khazanah intelektual Islam."
+  keywords="perpustakaan digital, buku klasik Arab, terjemahan, intelektual Islam, crowd sourcing, maragha, literatur Islam, naskah klasik"
+  type="website"
+  image="/logo.svg"
+/>
 
 <main class="container mx-auto px-6 py-8">
   <section

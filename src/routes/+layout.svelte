@@ -7,6 +7,7 @@
   import { Toaster } from 'svelte-sonner';
   import DarkModeToggle from '$lib/components/DarkModeToggle.svelte';
   import { theme } from '$lib/stores/theme'; // Import theme to initialize it
+  import SEO from '$lib/components/SEO.svelte';
 
   let { children } = $props();
   let user = $state<any | null>(null);
@@ -70,6 +71,7 @@
 </svelte:head>
 
 <div class="min-h-screen" style="background-color: var(--background)">
+  <SEO />
   <header
     class="bg-[var(--color-ribbon-600)] text-[var(--primary-foreground)] shadow-lg"
   >
