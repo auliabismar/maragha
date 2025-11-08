@@ -24,6 +24,36 @@ export interface Halaman {
 	status?: string;
 }
 
+// Cache interfaces and constants
+interface CacheEntry<T> {
+	data: T;
+	timestamp: number;
+	bookId: string;
+}
+
+const BOOK_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+const PAGE_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_ENTRIES = 20;
+
+// Cache stores
+const bookCache = new Map<string, CacheEntry<Book>>();
+const halamanCache = new Map<string, CacheEntry<Halaman[]>>();
+
+// Cache management functions
+function cleanOldCacheEntries(cache: Map<string, any>) {
+	if (cache.size <= MAX_CACHE_ENTRIES) return;
+	
+	const entries = Array.from(cache.entries());
+	entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+	entries.slice(0, entries.length - MAX_CACHE_ENTRIES).forEach(([key]) => {
+		cache.delete(key);
+	});
+}
+
+function checkCacheValidity<T>(entry: CacheEntry<T> | undefined, duration: number): boolean {
+	return !!(entry && (Date.now() - entry.timestamp) < duration);
+}
+
 // Core stores
 export const book = writable<Book | null>(null);
 export const halamanRecords = writable<Halaman[]>([]);
@@ -70,13 +100,24 @@ export function toggleImages() {
 	});
 }
 
-async function fetchBook(bookId: string) {
-	console.log('Fetching book with ID:', bookId);
+async function fetchBook(bookId: string, forceRefresh = false) {
+	// Check cache first
+	const cached = bookCache.get(bookId);
+	const cacheIsValid = checkCacheValidity(cached, BOOK_CACHE_DURATION);
+	
+	if (cacheIsValid && !forceRefresh) {
+		console.log('Using cached book data for book:', bookId);
+		if (cached) {
+			book.set(cached.data);
+		}
+		return;
+	}
+
+	console.log('Fetching fresh book data for book:', bookId);
 	try {
 		const record = await pb.collection('buku').getOne(bookId, {
 			expand: 'penulis,penerbit,kategori'
 		});
-		console.log('Book record fetched:', record);
 
 		const bookData: Book = {
 			id: record.id,
@@ -89,32 +130,57 @@ async function fetchBook(bookId: string) {
 			screenshot: record.screenshot || false
 		};
 		
+		// Update cache
+		bookCache.set(bookId, {
+			data: bookData,
+			timestamp: Date.now(),
+			bookId
+		});
+		
+		// Clean up old cache entries
+		cleanOldCacheEntries(bookCache);
+		
 		book.set(bookData);
 	} catch (error) {
 		console.error('Error fetching book:', error);
-		goto('/');
+		// Use stale cache as fallback
+		if (cached) {
+			console.log('Using stale cache as fallback for book:', bookId);
+			book.set(cached.data);
+		} else {
+			goto('/');
+		}
 	}
 }
 
-async function fetchHalaman(bookId: string) {
-	console.log('Fetching halaman for book ID:', bookId);
-	// Abort previous request if any
-	if (abortController) {
+async function fetchHalaman(bookId: string, page?: number, itemsPerPage?: number, isPrefetch = false) {
+	// Abort previous request if any (only for non-prefetch requests)
+	if (!isPrefetch && abortController) {
 		abortController.abort();
 	}
 	abortController = new AbortController();
 
+	const currentPageValue = page || getCurrentPage();
+	const itemsPerPageValue = itemsPerPage || getItemsPerPage();
+	const cacheKey = `${bookId}-${currentPageValue}-${itemsPerPageValue}`;
+	
+	// Check cache first
+	const cached = halamanCache.get(cacheKey);
+	const cacheIsValid = checkCacheValidity(cached, PAGE_CACHE_DURATION);
+	
+	if (cacheIsValid && !isPrefetch && cached) {
+		console.log('Using cached halaman data for:', cacheKey);
+		halamanRecords.set(cached.data);
+		return;
+	}
+
 	try {
-		const currentPageValue = getCurrentPage();
-		const itemsPerPageValue = getItemsPerPage();
-		
 		const records = await pb.collection('halaman').getList(currentPageValue, itemsPerPageValue, {
 			filter: `buku = "${bookId}"`,
 			sort: 'halaman',
 			expand: 'buku',
 			signal: abortController.signal
 		});
-		console.log('Halaman records fetched:', records);
 
 		const halamanData: Halaman[] = records.items.map((record) => ({
 			id: record.id,
@@ -126,13 +192,32 @@ async function fetchHalaman(bookId: string) {
 			buku: record.buku
 		}));
 
-		halamanRecords.set(halamanData);
-		totalPages.set(Math.ceil(records.totalItems / itemsPerPageValue));
+		// Update cache (only for non-prefetch or when we have fresh data)
+		halamanCache.set(cacheKey, {
+			data: halamanData,
+			timestamp: Date.now(),
+			bookId
+		});
+		
+		// Clean up old cache entries
+		cleanOldCacheEntries(halamanCache);
+
+		// Only update stores for non-prefetch requests
+		if (!isPrefetch) {
+			halamanRecords.set(halamanData);
+			totalPages.set(Math.ceil(records.totalItems / itemsPerPageValue));
+		}
 	} catch (error: any) {
 		if (error.name === 'AbortError') {
 			return;
 		}
 		console.error('Error fetching halaman:', error);
+		
+		// Use stale cache as fallback for non-prefetch requests
+		if (!isPrefetch && cached) {
+			console.log('Using stale cache as fallback for halaman:', cacheKey);
+			halamanRecords.set(cached.data);
+		}
 	}
 }
 
@@ -160,6 +245,8 @@ async function syncWithBookshelf(bookId: string) {
 		}
 
 		await fetchHalaman(bookId);
+		// Start background prefetching after loading initial page
+		prefetchAdjacentPages(bookId);
 	} catch (error) {
 		console.error('Error syncing with bookshelf:', error);
 	}
@@ -184,6 +271,8 @@ export async function goToPage(bookId: string, page: number) {
 		currentPage.set(page);
 		await updateBookshelfPage(page);
 		await fetchHalaman(bookId);
+		// Start background prefetching for adjacent pages
+		prefetchAdjacentPages(bookId);
 		// Scroll to top - this should be handled in component
 	}
 }
@@ -361,7 +450,7 @@ function getLemariRecord(): any {
 	return value;
 }
 
-export async function refreshHalamanData(bookId: string, halamanId: string) {
+export async function refreshHalamanData(bookId: string, halamanId: string, forceRefresh = true) {
 	try {
 		const record = await pb.collection('halaman').getOne(halamanId);
 		
@@ -384,6 +473,23 @@ export async function refreshHalamanData(bookId: string, halamanId: string) {
 			}
 			return records;
 		});
+
+		// Update cache if the halaman is cached
+		const currentPageValue = getCurrentPage();
+		const itemsPerPageValue = getItemsPerPage();
+		const cacheKey = `${bookId}-${currentPageValue}-${itemsPerPageValue}`;
+		const cached = halamanCache.get(cacheKey);
+		
+		if (cached) {
+			const updatedCacheData = cached.data.map(halaman =>
+				halaman.id === halamanId ? updatedHalaman : halaman
+			);
+			halamanCache.set(cacheKey, {
+				data: updatedCacheData,
+				timestamp: Date.now(),
+				bookId
+			});
+		}
 	} catch (error) {
 		console.error('Error refreshing halaman data:', error);
 	}
@@ -395,4 +501,71 @@ export const isEditor = derived([book], ([$book]) => pb.authStore.model?.akses =
 
 export function cleanup() {
 	abortController?.abort();
+}
+
+// Background prefetching functionality
+export async function prefetchAdjacentPages(bookId: string) {
+	const currentPageValue = getCurrentPage();
+	const totalPagesValue = getTotalPages();
+	
+	// Prefetch next page
+	if (currentPageValue < totalPagesValue) {
+		setTimeout(() => {
+			fetchHalaman(bookId, currentPageValue + 1, getItemsPerPage(), true);
+		}, 100);
+	}
+	
+	// Prefetch previous page
+	if (currentPageValue > 1) {
+		setTimeout(() => {
+			fetchHalaman(bookId, currentPageValue - 1, getItemsPerPage(), true);
+		}, 200);
+	}
+}
+
+// Cache management functions
+export function clearBookCache(bookId?: string) {
+	if (bookId) {
+		bookCache.delete(bookId);
+	} else {
+		bookCache.clear();
+	}
+}
+
+export function clearHalamanCache(bookId?: string) {
+	if (bookId) {
+		Array.from(halamanCache.keys())
+			.filter(key => key.startsWith(bookId))
+			.forEach(key => halamanCache.delete(key));
+	} else {
+		halamanCache.clear();
+	}
+}
+
+export function clearAllCache() {
+	bookCache.clear();
+	halamanCache.clear();
+}
+
+export function getCacheStats() {
+	const bookCacheEntries = Array.from(bookCache.values()).map(entry => ({
+		bookId: entry.bookId,
+		age: Date.now() - entry.timestamp,
+		dataSize: JSON.stringify(entry.data).length
+	}));
+	
+	const halamanCacheEntries = Array.from(halamanCache.entries()).map(([key, entry]) => ({
+		cacheKey: key,
+		bookId: entry.bookId,
+		age: Date.now() - entry.timestamp,
+		dataSize: JSON.stringify(entry.data).length
+	}));
+	
+	return {
+		bookCacheSize: bookCache.size,
+		halamanCacheSize: halamanCache.size,
+		bookCacheEntries,
+		halamanCacheEntries,
+		totalCacheSize: bookCache.size + halamanCache.size
+	};
 }
