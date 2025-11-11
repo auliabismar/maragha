@@ -54,7 +54,7 @@
 			<!-- Header -->
 			<div class="flex items-center justify-between p-6 border-b border-[var(--border)]">
 				<h2 class="text-xl font-semibold text-[var(--foreground)]">
-					Saran Review Terjemahan
+					Saran Terjemahan
 				</h2>
 				<button
 					onclick={handleClose}

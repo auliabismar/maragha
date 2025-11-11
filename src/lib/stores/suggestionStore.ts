@@ -10,14 +10,32 @@ export const alasanKeterangan = writable('');
 export const selectedHalamanId = writable('');
 export const selectedHalamanNo = writable(0);
 
+// Current page tracking
+export const currentPageId = writable('');
+export const currentBookId = writable('');
+
+// Clear all suggestion data
+export function clearAllSuggestionData() {
+	selectedText.set('');
+	terjemahanBaru.set('');
+	alasanKeterangan.set('');
+	selectedHalamanId.set('');
+	selectedHalamanNo.set(0);
+	showSuggestionDialog.set(false);
+	window.getSelection()?.removeAllRanges();
+}
+
 // Text selection tracking
-export function handleTextSelection(halamanId: string, halamanNo: number) {
+export function handleTextSelection(halamanId: string, halamanNo: number, bookId?: string) {
 	const selection = window.getSelection();
 	const text = selection?.toString().trim() || '';
 	if (text) {
 		selectedText.set(text);
 		selectedHalamanId.set(halamanId);
 		selectedHalamanNo.set(halamanNo);
+		if (bookId) {
+			currentBookId.set(bookId);
+		}
 	} else {
 		clearSelection();
 	}
@@ -34,11 +52,6 @@ export function openSuggestionDialog() {
 
 export function closeSuggestionDialog() {
 	showSuggestionDialog.set(false);
-	selectedText.set('');
-	terjemahanBaru.set('');
-	alasanKeterangan.set('');
-	selectedHalamanId.set('');
-	selectedHalamanNo.set(0);
 	window.getSelection()?.removeAllRanges();
 }
 
@@ -96,4 +109,9 @@ export function handleKeydown(event: KeyboardEvent) {
 }
 
 // Derived stores
-export const isSuggestionEnabled = derived(selectedText, ($selectedText) => $selectedText.trim().length > 0);
+export const isSuggestionEnabled = derived(
+	[selectedText, selectedHalamanId, currentPageId],
+	([$selectedText, $selectedHalamanId, $currentPageId]) => {
+		return $selectedText.trim().length > 0 && $selectedHalamanId === $currentPageId;
+	}
+);

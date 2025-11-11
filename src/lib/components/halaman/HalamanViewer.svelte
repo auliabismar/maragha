@@ -9,7 +9,10 @@
 		selectedText,
 		isSuggestionEnabled,
 		openSuggestionDialog,
-		handleTextSelection
+		handleTextSelection,
+		currentPageId,
+		clearAllSuggestionData,
+		selectedHalamanId
 	} from '$lib/stores/suggestionStore';
 	import {
 		isEditorMode,
@@ -34,10 +37,24 @@ import RichTextEditor from '$lib/components/RichTextEditor.svelte';
 	let showImagesValue = $derived($showImages);
 	let isEditorModeValue = $derived($isEditorMode);
 	let isSuggestionEnabledValue = $derived($isSuggestionEnabled);
+	let selectedHalamanIdValue = $derived($selectedHalamanId);
 	
 	// Current edit data values for binding
 	let currentTerjemah = $state('');
 	let currentTulisan = $state('');
+
+	// Update current page ID and clear suggestion data when halaman changes
+	$effect(() => {
+		if (halaman?.id) {
+			// Set current page ID
+			currentPageId.set(halaman.id);
+			
+			// Clear any previous selection data that doesn't belong to this page
+			if (selectedHalamanIdValue && selectedHalamanIdValue !== halaman.id) {
+				clearAllSuggestionData();
+			}
+		}
+	});
 
 	// Update local state when store changes
 	$effect(() => {
@@ -75,7 +92,7 @@ import RichTextEditor from '$lib/components/RichTextEditor.svelte';
 	let imageHeight = $state(0);
 
 	function handleTextSelectionClick() {
-		handleTextSelection(halaman.id, halaman.halaman);
+		handleTextSelection(halaman.id, halaman.halaman, bookId);
 	}
 
 	function openSuggestionDialogClick() {
