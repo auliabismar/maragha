@@ -37,7 +37,6 @@
 				try {
 					await initBookPage(bookId);
 				} catch (error) {
-					console.error('Failed to initialize page:', error);
 				}
 			}
 		}

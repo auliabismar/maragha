@@ -21,7 +21,6 @@
       goto('/');
     } catch (err: any) {
       error = err.message || 'An error occurred during authentication.';
-      console.error('OAuth2 error:', err);
     } finally {
       loading = false;
     }

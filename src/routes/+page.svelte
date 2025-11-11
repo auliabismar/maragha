@@ -70,7 +70,6 @@
 
       filterBooks();
     } catch (error) {
-      console.error('Error fetching books:', error);
     }
   }
 

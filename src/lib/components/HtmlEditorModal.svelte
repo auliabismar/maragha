@@ -25,7 +25,7 @@
 		<div class="bg-[var(--card)] rounded-lg shadow-lg w-full max-w-3xl max-h-[90vh] flex flex-col">
 			<div class="flex justify-between items-center p-4 border-b border-[var(--border)]">
 				<h2 class="text-lg font-semibold text-[var(--foreground)]">Edit HTML Source</h2>
-				<button onclick={close} class="text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+				<button onclick={close} class="text-[var(--muted-foreground)] hover:text-[var(--foreground)]" aria-label="Close modal">
 					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
 					</svg>
@@ -34,7 +34,7 @@
 			<div class="flex-grow p-4 overflow-y-auto">
 				<textarea
 					bind:value={htmlContent}
-					class="w-full h-full min-h-[300px] p-2 border border-[var(--border)] rounded-md bg-[var(--background)] text-[var(--foreground)] font-mono text-sm resize-none"
+					class="w-full h-full min-h-[500px] p-4 border border-[var(--border)] rounded-md bg-[var(--background)] text-[var(--foreground)] font-mono text-sm resize-none"
 					placeholder="Enter HTML here..."
 				></textarea>
 			</div>

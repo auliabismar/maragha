@@ -109,7 +109,6 @@ import RichTextEditor from '$lib/components/RichTextEditor.svelte';
 			// Refresh the halaman data after successful save
 			await refreshHalamanData(bookId, halaman.id);
 		} catch (error) {
-			console.error('Error saving changes:', error);
 		}
 	}
 
@@ -161,7 +160,7 @@ import RichTextEditor from '$lib/components/RichTextEditor.svelte';
 		<div class="{showImagesValue && $hasScreenshots && halaman.image ? 'lg:w-1/2' : 'w-full'}">
 			<div
 				id="terjemah-box"
-				class="bg-[var(--card)] rounded-lg p-6 shadow-sm border border-[var(--border)]"
+				class="bg-[var(--card)] rounded-lg p-8 shadow-sm border border-[var(--border)]"
 				role="textbox"
 				tabindex="0"
 				onmouseup={handleTextSelectionClick}
@@ -252,25 +251,27 @@ import RichTextEditor from '$lib/components/RichTextEditor.svelte';
 					-->
 					{#if isEditorModeValue}
 						<!-- ================== Editor Mode ================== -->
+						<!-- Always show two boxes: left (image/text), right (translation) -->
 						<div class="flex flex-col lg:flex-row gap-6">
-							<!-- Terjemahan Editor -->
+							<!-- Left Box: Image or Text -->
 							<div class="flex-1">
-								<h3 class="text-sm font-medium text-[var(--muted-foreground)] mb-2">Terjemahan</h3>
-								<RichTextEditor
-									bind:value={currentTerjemah}
-									bind:this={terjemahEditorRef}
-									placeholder="Edit terjemahan..."
-									on:change={(e) => updateTerjemah(e.detail.value)}
-								/>
-							</div>
-
-							<!-- Tulisan Asli (Editable or Read-only based on halaman.image) -->
-							<div class="flex-1">
-								<h3 class="text-sm font-medium text-[var(--muted-foreground)] mb-2">Tulisan Asli</h3>
-								{#if !halaman.image}
-									<!-- Side-by-side view: Read-only display for Tulisan Asli -->
+								<h3 class="text-sm font-medium text-[var(--muted-foreground)] mb-2">
+									{halaman.image ? 'Gambar' : 'Tulisan Asli'}
+								</h3>
+								{#if halaman.image}
+									<!-- Show image in left box -->
+									<div class="w-full">
+										<img
+											src={halaman.image}
+											alt="Halaman {halaman.halaman}"
+											class="w-full rounded-md border border-[var(--border)] bg-[var(--background)]"
+											loading="lazy"
+										/>
+									</div>
+								{:else}
+									<!-- Show text in left box (read-only) -->
 									<div
-										class="w-full min-h-[400px] lg:min-h-screen p-3 border border-[var(--border)] rounded-md bg-[var(--muted)] text-[var(--foreground)] opacity-75"
+										class="w-full min-h-[400px] p-6 border border-[var(--border)] rounded-md bg-[var(--muted)] text-[var(--foreground)] opacity-75"
 									>
 										<div
 											class="prose prose-sm max-w-none text-[var(--foreground)] leading-relaxed font-arabic"
@@ -278,15 +279,19 @@ import RichTextEditor from '$lib/components/RichTextEditor.svelte';
 											{@html currentTulisan}
 										</div>
 									</div>
-								{:else}
-									<!-- Stacked view: Editable textarea for Tulisan Asli -->
-									<textarea
-										bind:value={currentTulisan}
-										oninput={(e) => updateTulisan((e.currentTarget as HTMLTextAreaElement).value)}
-										class="w-full min-h-[150px] p-3 border border-[var(--border)] rounded-md bg-[var(--background)] text-[var(--foreground)] resize-y"
-										placeholder="Edit tulisan asli..."
-									></textarea>
 								{/if}
+							</div>
+
+							<!-- Right Box: Translation Editor -->
+							<div class="flex-1">
+								<h3 class="text-sm font-medium text-[var(--muted-foreground)] mb-2">Terjemahan</h3>
+								<RichTextEditor
+									bind:value={currentTerjemah}
+									bind:this={terjemahEditorRef}
+									placeholder="Edit terjemahan..."
+									{...{ class: 'min-h-[400px]' }}
+									on:change={(e) => updateTerjemah(e.detail.value)}
+								/>
 							</div>
 						</div>
 					{:else}
@@ -299,19 +304,6 @@ import RichTextEditor from '$lib/components/RichTextEditor.svelte';
 								{@html halaman.terjemah}
 							</div>
 						</div>
-
-						<!-- {#if !halaman.image}
-							<div class="mt-6">
-								<h3 class="text-sm font-medium text-[var(--muted-foreground)] mb-2">
-									Tulisan Asli2
-								</h3>
-								<div
-									class="prose prose-sm max-w-none text-[var(--foreground)] leading-relaxed font-arabic"
-								>
-									{@html currentTulisan}
-								</div>
-							</div>
-						{/if} -->
 					{/if}
 				</div>
 			</div>

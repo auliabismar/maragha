@@ -67,7 +67,6 @@
       });
       lemariRecords = await Promise.all(fetchPromises);
     } catch (error) {
-      console.error('Error fetching bookshelf:', error);
     }
   }
 
@@ -77,7 +76,6 @@
       // Refresh the bookshelf after removing
       await fetchBookshelf();
     } catch (error) {
-      console.error('Error removing from bookshelf:', error);
     }
   }
 

@@ -73,7 +73,6 @@
       // Muat ulang data
       await fetchAssignments();
     } catch (error: any) {
-      console.error('Error bulk updating:', error);
       toast.error('Gagal memperbarui penugasan.');
     }
   }
@@ -109,7 +108,6 @@
       }));
       filterAssignments();
     } catch (error) {
-      console.error('Error fetching assignments:', error);
     }
   }
 

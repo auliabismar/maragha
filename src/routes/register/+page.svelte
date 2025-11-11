@@ -31,7 +31,6 @@
       goto('/');
     } catch (err: any) {
       let errorMessage = '';
-      console.log(err);
       if (err?.data?.data?.email?.message && err?.data?.data?.email?.message.includes('Value must be unique.')) {
         errorMessage = 'Email sudah terdaftar. Silakan gunakan email lain atau masuk.';
       } else if (err?.data?.data?.password?.message && err?.data?.data?.password?.message.includes('must be at least')) {
