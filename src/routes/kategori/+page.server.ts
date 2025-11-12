@@ -18,12 +18,9 @@ export const load: PageServerLoad = async ({ locals, parent, cookies }) => {
 				user
 			};
 		}
-		console.log('Query PB auth valid for kategori:', queryPb.authStore.isValid);
-		console.log('Query user ID for kategori:', queryPb.authStore.model?.id);
 		const records = await queryPb.collection('kategori').getFullList({
 			sort: '-created'
 		});
-		console.log('Fetched kategori records:', records.length);
 		return {
 			kategori: records,
 			user

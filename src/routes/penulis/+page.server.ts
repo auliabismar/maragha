@@ -18,12 +18,9 @@ export const load: PageServerLoad = async ({ locals, parent, cookies }) => {
 				user
 			};
 		}
-		console.log('Query PB auth valid for penulis:', queryPb.authStore.isValid);
-		console.log('Query user ID for penulis:', queryPb.authStore.model?.id);
 		const records = await queryPb.collection('penulis').getFullList({
 			sort: '-created'
 		});
-		console.log('Fetched penulis records:', records.length);
 		return {
 			penulis: records,
 			user

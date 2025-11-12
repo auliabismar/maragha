@@ -14,21 +14,21 @@ export const load: PageServerLoad = async ({ locals, parent, cookies }) => {
 		if (!queryPb.authStore.isValid) {
 			console.error('Auth not valid for query');
 			return {
-				penerbit: [],
+				buku: [],
 				user
 			};
 		}
-		const records = await queryPb.collection('penerbit').getFullList({
+		const records = await queryPb.collection('buku').getFullList({
 			sort: '-created'
 		});
 		return {
-			penerbit: records,
+			buku: records,
 			user
 		};
 	} catch (error) {
-		console.error('Error fetching penerbit:', error);
+		console.error('Error fetching buku:', error);
 		return {
-			penerbit: [],
+			buku: [],
 			user
 		};
 	}

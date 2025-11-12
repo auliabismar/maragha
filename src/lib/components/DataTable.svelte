@@ -106,7 +106,7 @@
 	<div class="flex justify-between items-center mb-8">
 		<div>
 			<h1 class="text-3xl font-bold text-[var(--primary)]">{title}</h1>
-			<p class="text-[var(--primary-foreground)] mt-2">{description}</p>
+			<p class="text-[var(--muted-foreground)] mt-2">{description}</p>
 		</div>
 		<button
 			onclick={handleAddNew}

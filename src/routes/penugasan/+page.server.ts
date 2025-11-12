@@ -18,12 +18,9 @@ export const load: PageServerLoad = async ({ locals, parent, cookies }) => {
 				user
 			};
 		}
-		console.log('Query PB auth valid:', queryPb.authStore.isValid);
-		console.log('Query user ID:', queryPb.authStore.model?.id);
 		const records = await queryPb.collection('penugasan').getFullList({
 			sort: '-created'
 		});
-		console.log('Fetched records:', records.length);
 		return {
 			penugasan: records,
 			user

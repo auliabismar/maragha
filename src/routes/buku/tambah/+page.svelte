@@ -31,10 +31,6 @@
 	let penerbit = $state(data.penerbit || []);
 	let penulis = $state(data.penulis || []);
 	let kategori = $state(data.kategori || []);
-	console.log('Penerbit:', penerbit);
-	console.log('Penulis:', penulis);
-	console.log('Kategori:', kategori);
-
 
 	let judul = $state('');
 	let selectedPenerbit = $state<string | null>(null);

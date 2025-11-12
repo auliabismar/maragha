@@ -106,14 +106,12 @@ async function fetchBook(bookId: string, forceRefresh = false) {
 	const cacheIsValid = checkCacheValidity(cached, BOOK_CACHE_DURATION);
 	
 	if (cacheIsValid && !forceRefresh) {
-		console.log('Using cached book data for book:', bookId);
 		if (cached) {
 			book.set(cached.data);
 		}
 		return;
 	}
 
-	console.log('Fetching fresh book data for book:', bookId);
 	try {
 		const record = await pb.collection('buku').getOne(bookId, {
 			expand: 'penulis,penerbit,kategori'
@@ -145,7 +143,6 @@ async function fetchBook(bookId: string, forceRefresh = false) {
 		console.error('Error fetching book:', error);
 		// Use stale cache as fallback
 		if (cached) {
-			console.log('Using stale cache as fallback for book:', bookId);
 			book.set(cached.data);
 		} else {
 			goto('/');
@@ -169,7 +166,6 @@ async function fetchHalaman(bookId: string, page?: number, itemsPerPage?: number
 	const cacheIsValid = checkCacheValidity(cached, PAGE_CACHE_DURATION);
 	
 	if (cacheIsValid && !isPrefetch && cached) {
-		console.log('Using cached halaman data for:', cacheKey);
 		halamanRecords.set(cached.data);
 		return;
 	}
@@ -215,7 +211,6 @@ async function fetchHalaman(bookId: string, page?: number, itemsPerPage?: number
 		
 		// Use stale cache as fallback for non-prefetch requests
 		if (!isPrefetch && cached) {
-			console.log('Using stale cache as fallback for halaman:', cacheKey);
 			halamanRecords.set(cached.data);
 		}
 	}

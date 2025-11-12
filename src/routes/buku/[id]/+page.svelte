@@ -1,16 +1,30 @@
 <script lang="ts">
+	import DataTable from '$lib/components/DataTable.svelte';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import pb from '$lib/pocketbase';
 	import { goto } from '$app/navigation';
 	import type { PageData } from './$types';
 
+	let editing = $state(false);
+	let publishers = $state<any[]>([]);
+	let authors = $state<any[]>([]);
+	let categories = $state<any[]>([]);
+	let selectedPublisher = $state<any>(null);
+	let selectedAuthors = $state<any[]>([]);
+	let selectedCategories = $state<any[]>([]);
+
 	let book = $state<any>(null);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 
-	const bookId = $derived($page.params.id);
+	interface SelectionEventDetail {
+		selected: any[];
+	}
 
+	const bookId = $derived($page.params.id!);
+
+	
 	onMount(async () => {
 		if (!bookId) {
 			error = 'ID buku tidak valid.';
@@ -27,17 +41,78 @@
 			const record = await pb.collection('buku').getOne(bookId, {
 				expand: 'penerbit,penulis,kategori'
 			});
+
 			book = record;
+			loading = false;
+
+			// Load related data for editing if book is draft
+			if (book.status === 'Draft') {
+				// Load publishers
+				const publisherRecords = await pb.collection('penerbit').getFullList({
+					sort: '-created'
+				});
+				publishers = publisherRecords;
+
+				// Load authors
+				const authorRecords = await pb.collection('penulis').getFullList({
+					sort: '-created'
+				});
+				authors = authorRecords;
+
+				// Load categories
+				const categoryRecords = await pb.collection('kategori').getFullList({
+					sort: '-created'
+				});
+				categories = categoryRecords;
+
+				// Set current selections
+				if (book.expand?.penerbit) {
+					selectedPublisher = publishers.find(p => p.id === book.expand.penerbit.id) || book.expand.penerbit;
+				}
+				if (book.expand?.penulis) {
+					const currentAuthors = Array.isArray(book.expand.penulis) ? book.expand.penulis : [book.expand.penulis];
+					selectedAuthors = currentAuthors.map((author: any) => authors.find(a => a.id === author.id) || author);
+				}
+				if (book.expand?.kategori) {
+					const currentCategories = Array.isArray(book.expand.kategori) ? book.expand.kategori : [book.expand.kategori];
+					selectedCategories = currentCategories.map((category: any) => categories.find(c => c.id === category.id) || category);
+				}
+			}
 		} catch (err: any) {
 			if (err.status === 404) {
 				error = 'Buku tidak ditemukan.';
 			} else {
 				error = 'Gagal memuat data buku.';
 			}
-		} finally {
 			loading = false;
 		}
 	});
+
+	async function saveMetadata() {
+		if (!selectedPublisher || selectedAuthors.length === 0 || selectedCategories.length === 0) {
+			alert('Harap pilih penerbit, penulis, dan kategori.');
+			return;
+		}
+
+		try {
+			const updateData = {
+				penerbit: selectedPublisher.id || selectedPublisher,
+				penulis: selectedAuthors.map((author: any) => author.id || author),
+				kategori: selectedCategories.map((category: any) => category.id || category)
+			};
+
+			const updatedBook = await pb.collection('buku').update(bookId, updateData, {
+				expand: 'penerbit,penulis,kategori'
+			});
+
+			book = updatedBook;
+			editing = false;
+			alert('Metadata berhasil disimpan!');
+		} catch (err) {
+			console.error('Error saving metadata:', err);
+			alert('Gagal menyimpan metadata.');
+		}
+	}
 </script>
 
 <svelte:head>
@@ -150,9 +225,12 @@
 						</div>
 
 						<div class="flex gap-2">
-							{#if book.status === 'Draft'}
-								<button class="px-4 py-2 bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-[var(--primary-foreground)] rounded-md text-sm font-medium transition-colors border border-[var(--primary)]/20">
-									Edit Buku
+							{#if book.status === 'Draft' && !editing}
+								<button
+									onclick={() => editing = true}
+									class="px-4 py-2 bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-[var(--primary-foreground)] rounded-md text-sm font-medium transition-colors border border-[var(--primary)]/20"
+								>
+									Edit Metadata
 								</button>
 							{/if}
 							<a href="/buku" class="px-4 py-2 bg-[var(--muted)] hover:bg-[var(--muted)]/90 text-[var(--muted-foreground)] rounded-md text-sm font-medium transition-colors border border-[var(--muted)]/20">
@@ -162,6 +240,99 @@
 					</div>
 				</div>
 			</div>
+
+			<!-- Edit Metadata Modal -->
+			{#if editing}
+			<div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+				<div class="bg-[var(--background)] rounded-lg max-w-6xl w-full max-h-[95vh] overflow-y-auto border border-[var(--border)] shadow-2xl">
+					<div class="p-6">
+						<div class="flex justify-between items-center mb-6">
+							<h3 class="text-2xl font-semibold text-[var(--foreground)]">Edit Metadata Buku</h3>
+							<button
+								onclick={() => editing = false}
+								class="text-[var(--muted-foreground)] hover:text-[var(--foreground)] text-3xl font-bold p-2 rounded-full hover:bg-[var(--muted)] transition-colors"
+							>
+								&times;
+							</button>
+						</div>
+
+						<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+							<!-- Publisher Section -->
+							<div class="lg:col-span-1 space-y-4">
+
+								<select
+									bind:value={selectedPublisher}
+									class="w-full p-3 border border-[var(--border)] rounded-md bg-[var(--background)] text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+								>
+									<option value={null}>Pilih Penerbit</option>
+									{#each publishers as publisher}
+										<option value={publisher.id}>{publisher.id}</option>
+									{/each}
+								</select>
+							</div>
+
+							<!-- Authors Section -->
+							<div class="lg:col-span-1 space-y-4">
+								
+
+								<div class="border border-[var(--border)] rounded-md p-3 max-h-64 overflow-y-auto">
+									{#each authors as author}
+										<label class="flex items-center space-x-3 p-3 hover:bg-[var(--muted)]/50 rounded cursor-pointer border-b border-[var(--border)] last:border-b-0">
+											<input
+												type="checkbox"
+												value={author}
+												bind:group={selectedAuthors}
+												class="rounded text-[var(--primary)] focus:ring-[var(--primary)] h-4 w-4"
+											/>
+											<div>
+												<div class="font-medium text-[var(--foreground)]">{author.id}</div>
+												<div class="text-sm text-[var(--muted-foreground)]">{author.email}</div>
+											</div>
+										</label>
+									{/each}
+								</div>
+							</div>
+
+							<!-- Categories Section -->
+							<div class="lg:col-span-1 space-y-4">
+
+								<div class="border border-[var(--border)] rounded-md p-3 max-h-64 overflow-y-auto">
+									{#each categories as category}
+										<label class="flex items-center space-x-3 p-3 hover:bg-[var(--muted)]/50 rounded cursor-pointer border-b border-[var(--border)] last:border-b-0">
+											<input
+												type="checkbox"
+												value={category}
+												bind:group={selectedCategories}
+												class="rounded text-[var(--primary)] focus:ring-[var(--primary)] h-4 w-4"
+											/>
+											<div>
+												<div class="font-medium text-[var(--foreground)]">{category.id}</div>
+											</div>
+										</label>
+									{/each}
+								</div>
+							</div>
+						</div>
+
+						<div class="flex gap-3 pt-6 border-t border-[var(--border)] mt-6">
+							<button
+								onclick={saveMetadata}
+								disabled={!selectedPublisher || selectedAuthors.length === 0 || selectedCategories.length === 0}
+								class="flex-1 px-6 py-3 bg-[var(--success)] hover:bg-[var(--success)]/90 text-[var(--success-foreground)] rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								Simpan Perubahan
+							</button>
+							<button
+								onclick={() => editing = false}
+								class="px-6 py-3 bg-[var(--muted)] hover:bg-[var(--muted)]/90 text-[var(--muted-foreground)] rounded-md text-sm font-medium transition-colors"
+							>
+								Batal
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			{/if}
 
 			<!-- Book Content Placeholder -->
 			<div class="p-6 border-t border-[var(--border)]">
