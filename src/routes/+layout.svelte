@@ -10,8 +10,8 @@
   import { theme } from '$lib/stores/theme'; // Import theme to initialize it
   import SEO from '$lib/components/SEO.svelte';
 
-  let { children } = $props();
-  let user = $state<any | null>(null);
+  let { children, data } = $props();
+  let user = $state(data.user || null);
   let avatarUrl = $state<string | null>(null);
   let userInitials = $state<string | null>(null);
   let isMobileMenuOpen = $state(false);
@@ -26,8 +26,8 @@
   }
 
   onMount(() => {
-    updateUser();
-    pb.authStore.onChange(updateUser);
+  	updateUser();
+  	pb.authStore.onChange(updateUser);
   });
 
   function updateUser() {
@@ -160,15 +160,15 @@
               {/if}
             </a>
           {/if}
-          {#if user && (user.akses === 'Editor' || user.akses === 'Penerjemah')}
+          {#if user && user.akses === 'Editor'}
             <a
-              href="/penugasan"
+              href="/meja_kerja"
               class="relative px-3 py-2 rounded-md transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg group"
-              class:!text-[var(--accent)]={isActiveRoute('/penugasan')}
-              class:text-[var(--primary-foreground)]={!isActiveRoute('/penugasan')}
+              class:!text-[var(--accent)]={isActiveRoute('/meja_kerja')}
+              class:text-[var(--primary-foreground)]={!isActiveRoute('/meja_kerja')}
             >
-              <span class="relative z-10">Penugasan</span>
-              {#if isActiveRoute('/penugasan')}
+              <span class="relative z-10">Meja Kerja</span>
+              {#if isActiveRoute('/meja_kerja')}
                 <div class="absolute inset-0 bg-[var(--color-ribbon-400)] rounded-md opacity-20 transition-all duration-300"></div>
               {:else}
                 <div class="absolute inset-0 bg-[var(--accent)] rounded-md opacity-0 group-hover:opacity-10 transition-all duration-300 transform scale-95 group-hover:scale-100"></div>
@@ -247,18 +247,18 @@
                 {/if}
               </a>
             {/if}
-            {#if user && (user.akses === 'Editor' || user.akses === 'Penerjemah')}
+            {#if user && user.akses === 'Editor'}
               <a
-                href="/penugasan"
+                href="/meja_kerja"
                 class="relative px-4 py-3 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg group"
-                class:!text-[var(--accent)]={isActiveRoute('/penugasan')}
-                class:bg-[var(--color-ribbon-400)]={isActiveRoute('/penugasan')}
-                class:bg-opacity-20={isActiveRoute('/penugasan')}
-                class:text-[var(--primary-foreground)]={!isActiveRoute('/penugasan')}
+                class:!text-[var(--accent)]={isActiveRoute('/meja_kerja')}
+                class:bg-[var(--color-ribbon-400)]={isActiveRoute('/meja_kerja')}
+                class:bg-opacity-20={isActiveRoute('/meja_kerja')}
+                class:text-[var(--primary-foreground)]={!isActiveRoute('/meja_kerja')}
                 onclick={closeMobileMenu}
               >
-                <span class="relative z-10">Penugasan</span>
-                {#if !isActiveRoute('/penugasan')}
+                <span class="relative z-10">Meja Kerja</span>
+                {#if !isActiveRoute('/meja_kerja')}
                   <div class="absolute inset-0 bg-[var(--accent)] rounded-lg opacity-0 group-hover:opacity-10 transition-all duration-300 transform scale-95 group-hover:scale-100"></div>
                 {/if}
               </a>

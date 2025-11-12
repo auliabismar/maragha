@@ -4,18 +4,18 @@
 	import { onMount } from 'svelte';
 
 	let { data } = $props();
-	let { penugasan, user } = data;
+	let { penerbit, user } = data;
 
 	const columns = [
-		{ key: 'judul', label: 'Judul Tugas', sortable: true },
-		{ key: 'status', label: 'Status', sortable: true },
-		{ key: 'penerjemah', label: 'Penerjemah', sortable: false },
+		{ key: 'nama', label: 'Nama Penerbit', sortable: true },
+		{ key: 'alamat', label: 'Alamat', sortable: false },
+		{ key: 'kontak', label: 'Kontak', sortable: false },
 		{ key: 'created', label: 'Dibuat', sortable: true }
 	];
 
 	let sortBy = $state('created');
 	let sortDirection = $state('desc');
-	let filteredPenugasan = $state([...penugasan]);
+	let filteredPenerbit = $state([...penerbit]);
 
 	function handleSort(column: string) {
 		if (sortBy === column) {
@@ -24,11 +24,11 @@
 			sortBy = column;
 			sortDirection = 'desc';
 		}
-		sortPenugasan();
+		sortPenerbit();
 	}
 
-	function sortPenugasan() {
-		filteredPenugasan = [...penugasan].sort((a, b) => {
+	function sortPenerbit() {
+		filteredPenerbit = [...penerbit].sort((a, b) => {
 			let aVal = a[sortBy as keyof typeof a];
 			let bVal = b[sortBy as keyof typeof b];
 
@@ -44,65 +44,55 @@
 	}
 
 	function handleEdit(id: string) {
-		goto(`/penugasan/${id}/edit`);
+		goto(`/penerbit/${id}/edit`);
 	}
 
 	function handleDelete(id: string) {
-		if (confirm('Hapus penugasan ini?')) {
+		if (confirm('Hapus penerbit ini?')) {
 			// Implement delete logic
-			goto('/penugasan');
+			goto('/penerbit');
 		}
 	}
 
 	function handleAddNew() {
-		goto('/penugasan/tambah');
-	}
-
-	function getStatusColor(status: string) {
-		switch (status) {
-			case 'pending': return 'bg-yellow-100 text-yellow-800';
-			case 'progress': return 'bg-blue-100 text-blue-800';
-			case 'completed': return 'bg-green-100 text-green-800';
-			case 'cancelled': return 'bg-red-100 text-red-800';
-			default: return 'bg-gray-100 text-gray-800';
-		}
+		goto('/penerbit/tambah');
 	}
 
 	onMount(() => {
 		if (!user || user.akses !== 'Editor') {
 			goto('/meja_kerja');
 		}
-		sortPenugasan();
+		sortPenerbit();
 	});
 </script>
 
 <svelte:head>
-	<title>Daftar Penugasan - Maragha</title>
-	<meta name="description" content="Kelola tugas penerjemahan di Maragha" />
+	<title>Daftar Penerbit - Maragha</title>
+	<meta name="description" content="Kelola data penerbit di Maragha" />
 </svelte:head>
 
 <div class="container mx-auto px-6 py-8">
 	<div class="flex justify-between items-center mb-8">
 		<div>
-			<h1 class="text-3xl font-bold text-[var(--primary)]">Penugasan Penerjemahan</h1>
-			<p class="text-[var(--primary-foreground)] mt-2">Kelola tugas-tugas penerjemahan</p>
+			<h1 class="text-3xl font-bold text-[var(--primary)]">Data Penerbit</h1>
+			<p class="text-[var(--primary-foreground)] mt-2">Kelola daftar penerbit buku</p>
 		</div>
 		<button
 			on:click={handleAddNew}
 			class="bg-[var(--primary)] hover:bg-[var(--primary-600)] text-white px-4 py-2 rounded-lg transition-colors"
 		>
-			Tambah Penugasan
+			Tambah Penerbit
 		</button>
 	</div>
 
-	{#if filteredPenugasan.length === 0}
+	{#if filteredPenerbit.length === 0}
 		<div class="text-center py-12">
-			<p class="text-[var(--primary-foreground)] text-lg">Belum ada penugasan</p>
+			<p class="text-[var(--primary-foreground)] text-lg">Belum ada penerbit</p>
 			<button
 				on:click={handleAddNew}
 				class="mt-4 bg-[var(--primary)] hover:bg-[var(--primary-600)] text-white px-6 py-2 rounded-lg transition-colors"
 			>
-				Tambah Penugasan Pertama
+				Tambah Penerbit Pertama
 			</button>
 		</div>
 	{:else}
@@ -129,15 +119,15 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each filteredPenugasan as item}
+					{#each filteredPenerbit as item}
 						<tr class="border-t border-[var(--border)] hover:bg-[var(--muted)]">
-							<td class="px-6 py-4 font-medium">{item.judul || 'N/A'}</td>
-							<td class="px-6 py-4">
-								<span class="px-2 py-1 rounded-full text-xs font-medium {getStatusColor(item.status || 'pending')}">
-									{item.status || 'pending'}
-								</span>
+							<td class="px-6 py-4">{item.nama || 'N/A'}</td>
+							<td class="px-6 py-4 max-w-xs truncate">
+								{item.alamat ? item.alamat.substring(0, 50) + '...' : '-'}
 							</td>
-							<td class="px-6 py-4">{item.penerjemah?.name || 'Belum ditugaskan'}</td>
+							<td class="px-6 py-4 max-w-xs truncate">
+								{item.kontak ? item.kontak.substring(0, 30) + '...' : '-'}
+							</td>
 							<td class="px-6 py-4">
 								{new Date(item.created).toLocaleDateString('id-ID')}
 							</td>
@@ -168,7 +158,7 @@
 
 	<div class="mt-8 flex justify-between items-center">
 		<p class="text-[var(--primary-foreground)]">
-			Total: {filteredPenugasan.length} penugasan
+			Total: {filteredPenerbit.length} penerbit
 		</p>
 		<button
 			on:click={() => goto('/meja_kerja')}
@@ -191,5 +181,11 @@
 
 	button {
 		transition: all 0.2s ease-in-out;
+	}
+
+	truncate {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 </style>

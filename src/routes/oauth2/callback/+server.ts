@@ -16,6 +16,10 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		await pb
 			.collection('users')
 			.authWithOAuth2(provider, code || '', codeVerifier, `${url.origin}/oauth2/callback`);
+
+		// Set the cookie upon successful authentication
+		const authCookie = pb.authStore.exportToCookie({ httpOnly: true, secure: true });
+		cookies.set('pb_auth', authCookie, { path: '/' });
 	} catch (err) {
 		console.error('OAuth2 callback error:', err);
 		throw redirect(303, '/login?error=oauth_failed');

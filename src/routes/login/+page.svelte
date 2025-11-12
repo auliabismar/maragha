@@ -10,17 +10,22 @@
   let loading = $state<boolean>(false);
 
   async function handleLogin() {
-    loading = true;
-    error = null;
-    try {
-      await pb.collection('users').authWithPassword(email, password);
-      // Redirect to dashboard or home page on successful login
-      goto('/');
-    } catch (err: any) {
-      error = err.message || 'An unknown error occurred during login.';
-    } finally {
-      loading = false;
-    }
+  	loading = true;
+  	error = null;
+  	try {
+  		const authData = await pb.collection('users').authWithPassword(email, password);
+
+  		// Set cookie on the client after successful login
+  		const authCookie = pb.authStore.exportToCookie();
+  		document.cookie = `pb_auth=${encodeURIComponent(authCookie)}; path=/; max-age=86400; SameSite=Lax; Secure`;
+
+  		// Force full page reload to ensure server-side auth works
+  		window.location.href = '/';
+  	} catch (err: any) {
+  		error = err.message || 'An unknown error occurred during login.';
+  	} finally {
+  		loading = false;
+  	}
   }
 </script>
 
