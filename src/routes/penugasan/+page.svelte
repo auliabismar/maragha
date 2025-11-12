@@ -88,7 +88,7 @@
 			<p class="text-[var(--primary-foreground)] mt-2">Kelola tugas-tugas penerjemahan</p>
 		</div>
 		<button
-			on:click={handleAddNew}
+			onclick={handleAddNew}
 			class="bg-[var(--primary)] hover:bg-[var(--primary-600)] text-white px-4 py-2 rounded-lg transition-colors"
 		>
 			Tambah Penugasan
@@ -99,7 +99,7 @@
 		<div class="text-center py-12">
 			<p class="text-[var(--primary-foreground)] text-lg">Belum ada penugasan</p>
 			<button
-				on:click={handleAddNew}
+				onclick={handleAddNew}
 				class="mt-4 bg-[var(--primary)] hover:bg-[var(--primary-600)] text-white px-6 py-2 rounded-lg transition-colors"
 			>
 				Tambah Penugasan Pertama
@@ -113,7 +113,7 @@
 						{#each columns as column}
 							<th
 								class="px-6 py-3 text-left cursor-pointer hover:bg-[var(--muted-foreground)/10]"
-								on:click={() => handleSort(column.key)}
+								onclick={() => handleSort(column.key)}
 							>
 								<div class="flex items-center">
 									{column.label}
@@ -144,14 +144,14 @@
 							<td class="px-6 py-4">
 								<div class="flex space-x-2">
 									<button
-										on:click={() => handleEdit(item.id)}
+										onclick={() => handleEdit(item.id)}
 										class="text-[var(--primary)] hover:text-[var(--primary-600)] px-2 py-1 rounded"
 										title="Edit"
 									>
 										✏️
 									</button>
 									<button
-										on:click={() => handleDelete(item.id)}
+										onclick={() => handleDelete(item.id)}
 										class="text-red-500 hover:text-red-700 px-2 py-1 rounded"
 										title="Hapus"
 									>
@@ -171,7 +171,7 @@
 			Total: {filteredPenugasan.length} penugasan
 		</p>
 		<button
-			on:click={() => goto('/meja_kerja')}
+			onclick={() => goto('/meja_kerja')}
 			class="text-[var(--primary)] hover:text-[var(--primary-600)] underline"
 		>
 			Kembali ke Meja Kerja

@@ -1,8 +1,8 @@
 import { redirect } from '@sveltejs/kit';
-import pb from '$lib/pocketbase';
+import { getAuthenticatedPb } from '$lib/pocketbase';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals, parent }) => {
+export const load: PageServerLoad = async ({ locals, parent, cookies }) => {
 	const { user: layoutUser } = await parent();
 	const user = locals.user || layoutUser;
 	if (!user || user.akses !== 'Editor') {
@@ -10,9 +10,20 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 	}
 
 	try {
-		const records = await pb.collection('penulis').getFullList({
+		const queryPb = await getAuthenticatedPb(cookies);
+		if (!queryPb.authStore.isValid) {
+			console.error('Auth not valid for query');
+			return {
+				penulis: [],
+				user
+			};
+		}
+		console.log('Query PB auth valid for penulis:', queryPb.authStore.isValid);
+		console.log('Query user ID for penulis:', queryPb.authStore.model?.id);
+		const records = await queryPb.collection('penulis').getFullList({
 			sort: '-created'
 		});
+		console.log('Fetched penulis records:', records.length);
 		return {
 			penulis: records,
 			user
