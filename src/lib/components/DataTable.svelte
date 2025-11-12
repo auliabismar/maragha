@@ -1,5 +1,14 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { theme } from '$lib/stores/theme';
+
+	let resolvedTheme = $derived(
+		$theme === 'system'
+			? typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
+				? 'dark'
+				: 'light'
+			: $theme
+	);
 
 	interface Column {
 		key: string;
@@ -101,7 +110,7 @@
 		</div>
 		<button
 			onclick={handleAddNew}
-			class="bg-[var(--primary)] hover:bg-[var(--primary-600)] text-white px-4 py-2 rounded-lg transition-colors"
+			class="bg-[var(--primary)] hover:bg-[var(--destructive)] text-[var(--primary-foreground)] px-4 py-2 rounded-lg transition-colors"
 		>
 			{addButtonText}
 		</button>
@@ -112,7 +121,7 @@
 			<p class="text-[var(--primary-foreground)] text-lg">{emptyMessage}</p>
 			<button
 				onclick={handleAddNew}
-				class="mt-4 bg-[var(--primary)] hover:bg-[var(--primary-600)] text-white px-6 py-2 rounded-lg transition-colors"
+				class="mt-4 bg-[var(--primary)] hover:bg-[var(--destructive)] text-[var(--primary-foreground)] px-6 py-2 rounded-lg transition-colors"
 			>
 				{addButtonText}
 			</button>
@@ -144,7 +153,7 @@
 				</thead>
 				<tbody>
 					{#each filteredData as item}
-						<tr class="border-t border-[var(--border)] hover:bg-[var(--muted)]">
+						<tr class="border-t border-[var(--border)] hover:bg-[var(--muted)] text-[var(--muted-foreground)]">
 							{#each columns as column}
 								<td class="px-6 py-4 {column.key === 'id' ? 'font-mono text-sm' : ''}">
 									{getRecordValue(item, column.key)}
@@ -182,12 +191,12 @@
 	{/if}
 
 	<div class="mt-8 flex justify-between items-center">
-		<p class="text-[var(--primary-foreground)]">
+		<p class="text-[var(--muted-foreground)]">
 			Total: {filteredData.length} {filteredData.length === 1 ? 'item' : 'items'}
 		</p>
 		<button
 			onclick={() => goto(backRoute)}
-			class="text-[var(--primary)] hover:text-[var(--primary-600)] underline"
+			class="text-[var(--primary)] hover:text-[var(--destructive)] underline"
 		>
 			Kembali ke Meja Kerja
 		</button>
