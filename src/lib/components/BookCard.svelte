@@ -18,9 +18,10 @@
 	}
 </script>
 
-<button
-	onclick={handleClick}
+<div
 	class="bg-[var(--card)] rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow text-left w-full"
+	class:cursor-pointer={book.status !== 'Draft'}
+	onclick={book.status !== 'Draft' ? handleClick : undefined}
 >
 	<div class="aspect-[5/7] bg-muted flex items-center justify-center">
 		{#if book.cover}
@@ -43,17 +44,13 @@
 		<p class="text-sm text-[var(--muted-foreground)] mb-1">
 			Penulis: {book.penulis.join(', ')}
 		</p>
-		<!-- {#if book.kategori.length > 0}
-			<p class="text-sm text-[var(--muted-foreground)] mb-1">
-				Kategori: {book.kategori.join(', ')}
-			</p>
-		{/if} -->
-		{#if book.penerbit && book.penerbit != 'N/A'} 
+		{#if book.penerbit && book.penerbit != 'N/A'}
 		<p class="text-sm text-[var(--muted-foreground)] mb-3">
 			Penerbit: {book.penerbit}
 		</p>
 		{/if}
 
+		{#if book.status !== 'Draft'}
 		<!-- Progress Bar -->
 		<div class="mb-3">
 			<div class="flex items-center justify-between mb-1">
@@ -70,6 +67,7 @@
 				{book.halamanSetuju} dari {book.totalHalaman} halaman
 			</p>
 		</div>
+		{/if}
 
 		<div class="flex items-center justify-between">
 			{#if book.kategori.length > 0}
@@ -90,7 +88,9 @@
 					Tidak ada kategori
 				</span>
 			{/if}
-			<span class="text-[var(--color-ribbon-600)] text-sm font-medium"> Baca → </span>
+			<span class="text-[var(--color-ribbon-600)] text-sm font-medium">
+				{book.status === 'Draft' ? 'Segera Terbit' : 'Baca →'}
+			</span>
 		</div>
 	</div>
-</button>
+</div>
