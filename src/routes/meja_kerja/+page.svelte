@@ -38,13 +38,13 @@
 
 	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 		{#each links as link}
-			<div
+			<button
 				class="bg-[var(--background)] border border-[var(--border)] rounded-lg p-6 hover:shadow-lg transition-all duration-300 cursor-pointer"
 				onclick={() => handleLinkClick(link.href)}
 			>
 				<h3 class="text-xl font-semibold text-[var(--primary)] mb-2">{link.label}</h3>
 				<p class="text-[var(--foreground)] text-sm">{link.description}</p>
-			</div>
+			</button>
 		{/each}
 	</div>
 </div>
