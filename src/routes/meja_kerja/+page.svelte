@@ -40,10 +40,10 @@
 		{#each links as link}
 			<div
 				class="bg-[var(--background)] border border-[var(--border)] rounded-lg p-6 hover:shadow-lg transition-all duration-300 cursor-pointer"
-				on:click={() => handleLinkClick(link.href)}
+				onclick={() => handleLinkClick(link.href)}
 			>
 				<h3 class="text-xl font-semibold text-[var(--primary)] mb-2">{link.label}</h3>
-				<p class="text-[var(--primary-foreground)] text-sm">{link.description}</p>
+				<p class="text-[var(--foreground)] text-sm">{link.description}</p>
 			</div>
 		{/each}
 	</div>
