@@ -45,38 +45,36 @@
 			book = record;
 			loading = false;
 
-			// Load related data for editing if book is draft
-			if (book.status === 'Draft') {
-				// Load publishers
-				const publisherRecords = await pb.collection('penerbit').getFullList({
-					sort: '-created'
-				});
-				publishers = publisherRecords;
+			// Load publishers, authors, and categories for all books
+			// Load publishers
+			const publisherRecords = await pb.collection('penerbit').getFullList({
+				sort: '-created'
+			});
+			publishers = publisherRecords;
 
-				// Load authors
-				const authorRecords = await pb.collection('penulis').getFullList({
-					sort: '-created'
-				});
-				authors = authorRecords;
+			// Load authors
+			const authorRecords = await pb.collection('penulis').getFullList({
+				sort: '-created'
+			});
+			authors = authorRecords;
 
-				// Load categories
-				const categoryRecords = await pb.collection('kategori').getFullList({
-					sort: '-created'
-				});
-				categories = categoryRecords;
+			// Load categories
+			const categoryRecords = await pb.collection('kategori').getFullList({
+				sort: '-created'
+			});
+			categories = categoryRecords;
 
-				// Set current selections
-				if (book.expand?.penerbit) {
-					selectedPublisher = publishers.find(p => p.id === book.expand.penerbit.id) || book.expand.penerbit;
-				}
-				if (book.expand?.penulis) {
-					const currentAuthors = Array.isArray(book.expand.penulis) ? book.expand.penulis : [book.expand.penulis];
-					selectedAuthors = currentAuthors.map((author: any) => authors.find(a => a.id === author.id) || author);
-				}
-				if (book.expand?.kategori) {
-					const currentCategories = Array.isArray(book.expand.kategori) ? book.expand.kategori : [book.expand.kategori];
-					selectedCategories = currentCategories.map((category: any) => categories.find(c => c.id === category.id) || category);
-				}
+			// Set current selections for display
+			if (book.expand?.penerbit) {
+				selectedPublisher = book.expand.penerbit.id;
+			}
+			if (book.expand?.penulis) {
+				const currentAuthors = Array.isArray(book.expand.penulis) ? book.expand.penulis : [book.expand.penulis];
+				selectedAuthors = currentAuthors.map((author: any) => authors.find(a => a.id === author.id) || author);
+			}
+			if (book.expand?.kategori) {
+				const currentCategories = Array.isArray(book.expand.kategori) ? book.expand.kategori : [book.expand.kategori];
+				selectedCategories = currentCategories.map((category: any) => categories.find(c => c.id === category.id) || category);
 			}
 		} catch (err: any) {
 			if (err.status === 404) {
@@ -96,7 +94,7 @@
 
 		try {
 			const updateData = {
-				penerbit: selectedPublisher.id || selectedPublisher,
+				penerbit: selectedPublisher,
 				penulis: selectedAuthors.map((author: any) => author.id || author),
 				kategori: selectedCategories.map((category: any) => category.id || category)
 			};
@@ -318,13 +316,13 @@
 							<button
 								onclick={saveMetadata}
 								disabled={!selectedPublisher || selectedAuthors.length === 0 || selectedCategories.length === 0}
-								class="flex-1 px-6 py-3 bg-[var(--success)] hover:bg-[var(--success)]/90 text-[var(--success-foreground)] rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+								class="flex-1 px-6 py-3 bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary)]/90 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								Simpan Perubahan
 							</button>
 							<button
 								onclick={() => editing = false}
-								class="px-6 py-3 bg-[var(--muted)] hover:bg-[var(--muted)]/90 text-[var(--muted-foreground)] rounded-md text-sm font-medium transition-colors"
+								class="px-6 py-3 border border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--accent)] rounded-md text-sm font-medium transition-colors"
 							>
 								Batal
 							</button>
