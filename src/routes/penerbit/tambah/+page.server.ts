@@ -22,10 +22,6 @@ export const actions: Actions = {
 			return redirect(303, '/penerbit');
 		} catch (err: any) {
 			console.error('Error creating penerbit:', err);
-			
-			if (err.status === 303) {
-				throw err; // Re-throw redirect
-			}
 
 			if (err.status === 400) {
 				const validationErrors = err.data || {};

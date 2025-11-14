@@ -23,10 +23,6 @@ export const actions: Actions = {
 			return redirect(303, '/penulis');
 		} catch (err: any) {
 			console.error('Error creating penulis:', err);
-			
-			if (err.status === 303) {
-				throw err; // Re-throw redirect
-			}
 
 			if (err.status === 400) {
 				const validationErrors = err.data || {};
