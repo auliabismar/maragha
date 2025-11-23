@@ -23,8 +23,26 @@
   let searchQuery = $state<string>('');
   let availableKategoris = $state<string[]>([]);
   let showImages = $state<boolean>(true);
-  onMount(() => {
-    fetchBooks();
+  let currentBooks = $state<number>(0);
+  let currentPages = $state<number>(0);
+  let currentAuthors = $state<number>(0);
+  let statsSection: HTMLElement;
+  onMount(async () => {
+    await fetchBooks();
+    if (statsSection) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const targetBooks = 8; //books.length;
+            const targetPages = 1300; // books.reduce((acc: number, book: Book) => acc + book.halamanSetuju, 0);
+            const targetAuthors = 6; //new Set(books.flatMap((book: Book) => book.penulis)).size;
+            animateCounters(targetBooks, targetPages, targetAuthors);
+            observer.disconnect();
+          }
+        });
+      });
+      observer.observe(statsSection);
+    }
   });
 
   async function fetchBooks() {
@@ -88,6 +106,27 @@
   function calculateProgress(book: Book): number {
     if (book.totalHalaman === 0) return 0;
     return Math.round((book.halamanSetuju / book.totalHalaman) * 100);
+  }
+  
+  function cubicOut(t: number): number {
+    return --t * t * t + 1;
+  }
+  
+  function animateCounters(targetBooks: number, targetPages: number, targetAuthors: number) {
+    const duration = 2500;
+    const startTime = performance.now();
+    function update(currentTime: number) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = cubicOut(progress);
+      currentBooks = Math.floor(ease * targetBooks);
+      currentPages = Math.floor(ease * targetPages);
+      currentAuthors = Math.floor(ease * targetAuthors);
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      }
+    }
+    requestAnimationFrame(update);
   }
 </script>
 
@@ -164,22 +203,22 @@
         </a> -->
       </div>
 
-      <!-- <div
+      <div bind:this={statsSection}
         class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 pt-8 border-t border-[#D4A856]/30"
       >
-        <div class="text-center">
-          <div class="text-3xl font-bold text-[#29477B] mb-2">500+</div>
+        <div class="text-center hover:scale-105 transition-transform duration-300">
+          <div class="text-3xl font-bold text-[#29477B] mb-2">{currentBooks}</div>
           <div class="text-[#64463C] font-medium">Buku Klasik</div>
         </div>
-        <div class="text-center">
-          <div class="text-3xl font-bold text-[#D4A856] mb-2">1000+</div>
-          <div class="text-[#64463C] font-medium">Penerjemah Aktif</div>
+        <div class="text-center hover:scale-105 transition-transform duration-300">
+          <div class="text-3xl font-bold text-[#D4A856] mb-2">{currentPages}+</div>
+          <div class="text-[#64463C] font-medium">Halaman Diterjemahkan</div>
         </div>
-        <div class="text-center">
-          <div class="text-3xl font-bold text-[#64463C] mb-2">50+</div>
-          <div class="text-[#64463C] font-medium">Editor Profesional</div>
+        <div class="text-center hover:scale-105 transition-transform duration-300">
+          <div class="text-3xl font-bold text-[#64463C] mb-2">{currentAuthors}</div>
+          <div class="text-[#64463C] font-medium">Penulis Klasik</div>
         </div>
-      </div> -->
+      </div>
     </div>
 
     <div class="absolute top-4 right-4 text-[#D4A856] opacity-20">
