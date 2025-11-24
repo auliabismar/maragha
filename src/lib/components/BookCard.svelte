@@ -25,7 +25,7 @@
 >
 	<div class="aspect-[5/7] bg-muted flex items-center justify-center">
 		{#if book.cover}
-			<img src={book.cover} alt={book.judul} class="w-full h-full object-cover" />
+			<img src={book.cover} alt={book.judul} class="w-full h-full object-cover" loading="lazy" />
 		{:else}
 			<div class="text-[var(--muted-foreground)]">
 				<svg class="w-16 h-16 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
