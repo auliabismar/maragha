@@ -21,14 +21,61 @@
 
   let lemariRecords = $state<LemariRecord[]>([]);
   let loading = $state(true);
+  
+  const CACHE_KEY_PREFIX = 'maragha_lemari_';
+  const CACHE_EXPIRY = 60 * 60 * 1000; // 1 hour
+  
+  function getCache(userId: string): any | null {
+  	try {
+  		const cacheKey = `${CACHE_KEY_PREFIX}${userId}`;
+  		const cached = localStorage.getItem(cacheKey);
+  		if (!cached) return null;
+  		const { data: cachedData, timestamp } = JSON.parse(cached);
+  		if (Date.now() - timestamp > CACHE_EXPIRY) {
+  			localStorage.removeItem(cacheKey);
+  			return null;
+  		}
+  		return cachedData;
+  	} catch {
+  		return null;
+  	}
+  }
+  
+  function setCache(userId: string, dataToCache: any) {
+  	try {
+  		const cacheKey = `${CACHE_KEY_PREFIX}${userId}`;
+  		localStorage.setItem(cacheKey, JSON.stringify({
+  			data: dataToCache,
+  			timestamp: Date.now()
+  		}));
+  	} catch {}
+  }
+  
   onMount(async () => {
-    if (!pb.authStore.isValid) {
-      goto('/login');
-      return;
-    }
-
-    await fetchBookshelf();
-    loading = false;
+  	if (!pb.authStore.isValid) {
+  		goto('/login');
+  		return;
+  	}
+  	
+  	const userId = pb.authStore.model?.id;
+  	if (!userId) {
+  		goto('/login');
+  		return;
+  	}
+  	
+  	// Try to load from cache first
+  	const cached = getCache(userId);
+  	if (cached && cached.lemariRecords) {
+  		lemariRecords = cached.lemariRecords;
+  		loading = false;
+  	}
+  	
+  	// Always fetch fresh data in background
+  	await fetchBookshelf();
+  	
+  	// Update cache with fresh data
+  	setCache(userId, { lemariRecords });
+  	loading = false;
   });
 
   async function fetchBookshelf() {
@@ -66,8 +113,10 @@
         };
       });
       lemariRecords = await Promise.all(fetchPromises);
-    } catch (error) {
-    }
+      // Cache will be updated in onMount after fetch completes
+     } catch (error) {
+      console.error('Error fetching bookshelf:', error);
+     }
   }
 
   async function removeFromBookshelf(lemariId: string) {

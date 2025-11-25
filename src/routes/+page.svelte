@@ -52,6 +52,7 @@
 	let currentBooks = $state<number>(0);
 	let currentPages = $state<number>(0);
 	let currentAuthors = $state<number>(0);
+	let flooredPages = $derived(Math.floor(data.stats.totalTranslatedPages / 100) * 100);
 	let statsSection: HTMLElement;
 	let loadMoreObserver: IntersectionObserver;
 	let hasMore = $state<boolean>(true);
@@ -167,7 +168,7 @@
 			// filteredBooks is now reactive, no need to call filterBooks()
 			// Use cached stats if available, but prefer fresh from SSR
 			if (cached.stats) {
-				animateCounters(cached.stats.totalBooks, cached.stats.totalTranslatedPages, cached.stats.uniqueAuthors);
+				animateCounters(cached.stats.totalBooks, Math.floor(cached.stats.totalTranslatedPages / 100) * 100, cached.stats.uniqueAuthors);
 			}
 		} else {
 			// Cache initial SSR data
@@ -185,7 +186,7 @@
 					if (entry.isIntersecting) {
 						animateCounters(
 							data.stats.totalBooks,
-							data.stats.totalTranslatedPages,
+							flooredPages,
 							data.stats.uniqueAuthors
 						);
 						observer.disconnect();
