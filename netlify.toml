@@ -1,0 +1,20 @@
+# Netlify Build Configuration
+
+[build]
+  command = "npm run build"
+  publish = "build"
+  functions = "netlify/functions"
+
+# Node bundler configuration for ES modules
+[functions]
+  node_bundler = "esbuild"
+  
+# Directory for functions
+[functions]
+  directory = "netlify/functions"
+
+# Optional: Scheduled function configuration (alternative to inline config)
+# Uncomment if you prefer to configure schedule here instead of in the function file
+# [[functions]]
+#   path = "/refresh-cache"
+#   schedule = "0 * * * *"  # Every hour
