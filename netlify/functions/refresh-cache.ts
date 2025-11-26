@@ -36,4 +36,4 @@ export const config = {
     schedule: '0 * * * *' // Every hour
 };
 
-export const scheduledHandler = schedule(config.schedule, handler);
+export default schedule(config.schedule, handler);
