@@ -8,9 +8,6 @@
 # Node bundler configuration for ES modules
 [functions]
   node_bundler = "esbuild"
-  
-# Directory for functions
-[functions]
   directory = "netlify/functions"
 
 # Optional: Scheduled function configuration (alternative to inline config)

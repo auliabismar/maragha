@@ -1,6 +1,8 @@
 import type { PageServerLoad } from './$types';
 import { getCachedData } from '$lib/server/cache';
 
+export const prerender = false;
+
 export const load: PageServerLoad = async () => {
 	try {
 		// Get data from cache (will auto-refresh if needed)
@@ -13,7 +15,8 @@ export const load: PageServerLoad = async () => {
 			books: topBooks,
 			stats: cachedData.stats,
 			availableKategoris: cachedData.availableKategoris,
-			cacheTimestamp: cachedData.timestamp
+			cacheTimestamp: cachedData.timestamp,
+			totalAvailableBooks: cachedData.books.length
 		};
 	} catch (error) {
 		console.error('Error loading home data:', error);
@@ -25,7 +28,8 @@ export const load: PageServerLoad = async () => {
 				uniqueAuthors: 0
 			},
 			availableKategoris: [],
-			cacheTimestamp: Date.now()
+			cacheTimestamp: Date.now(),
+			totalAvailableBooks: 0
 		};
 	}
 };
