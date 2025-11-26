@@ -33,47 +33,41 @@
 
 	let { data }: { data: PageData } = $props();
 
-	interface Book {
-		id: string;
-		judul: string;
-		cover?: string;
-		status: string;
-		penulis: string[];
-		penerbit: string;
-		kategori: string[];
-		totalHalaman: number;
-		halamanSetuju: number;
-	}
-
 	let books = $state<Book[]>(data.books);
 	let selectedKategori = $state<string>('all');
 	let searchQuery = $state<string>('');
 	let availableKategoris = $state<string[]>(data.availableKategoris);
-	let showImages = $state<boolean>(true);
 	let currentBooks = $state<number>(0);
 	let currentPages = $state<number>(0);
 	let currentAuthors = $state<number>(0);
 	let flooredPages = $derived(Math.floor(data.stats.totalTranslatedPages / 100) * 100);
 	let statsSection: HTMLElement;
-	let loadMoreObserver: IntersectionObserver;
-	let hasMore = $state<boolean>(true);
 	let currentPage = $state<number>(1);
 	let perPage = 12;
 	let loading = $state<boolean>(false);
-	let allLoadedBooks = $state<Book[]>(data.books); // For filtering across loaded books
+	let allLoadedBooks = $state<Book[]>(data.books);
+	let totalAvailableBooks = $state<number>(data.totalAvailableBooks);
 
-	// Use $derived for reactive filtering
+	// Use $derived for reactive filtering and hasMore
 	let filteredBooks = $derived(
 		allLoadedBooks.filter((book) => {
+			// Only show "Terbit" books in main section
+			const isTerbit = book.status === 'Terbit';
 			const matchesKategori =
 				selectedKategori === 'all' || book.kategori.includes(selectedKategori);
 			const matchesSearch =
 				book.judul.toLowerCase().includes(searchQuery.toLowerCase()) ||
 				book.penulis.some((p) => p.toLowerCase().includes(searchQuery.toLowerCase())) ||
 				book.kategori.some((k) => k.toLowerCase().includes(searchQuery.toLowerCase()));
-			return matchesKategori && matchesSearch;
+			return isTerbit && matchesKategori && matchesSearch;
 		})
 	);
+
+	// Check if there are more books to load
+	let hasMore = $derived(allLoadedBooks.length < totalAvailableBooks);
+
+	// Get draft books for "Segera Terbit" section
+	let draftBooks = $derived(allLoadedBooks.filter((book) => book.status === 'Draft'));
 
 	const CACHE_KEY = 'maragha_home_data';
 	const CACHE_EXPIRY = 60 * 60 * 1000; // 1 hour
@@ -108,9 +102,9 @@
 	function mergeBooks(newBooks: Book[]) {
 		const existingIds = new Set(allLoadedBooks.map((b) => b.id));
 		const uniqueNew = newBooks.filter((b) => !existingIds.has(b.id));
-		allLoadedBooks = [...allLoadedBooks, ...uniqueNew];
+		//allLoadedBooks = [...allLoadedBooks, ...uniqueNew];
+		allLoadedBooks.push(...uniqueNew);
 		books = allLoadedBooks;
-		// filteredBooks is now reactive, no need to call filterBooks()
 	}
 
 	async function loadMore() {
@@ -119,14 +113,17 @@
 		try {
 			const response = await fetch(`/api/books?page=${currentPage + 1}&perPage=${perPage}`);
 			const result = await response.json();
-			if (result.books.length < perPage) hasMore = false;
+
+			// Merge new books
 			mergeBooks(result.books);
 			currentPage++;
+
 			// Update cache with all loaded books and stats
 			setCache({
 				books: allLoadedBooks,
 				stats: data.stats,
-				availableKategoris
+				availableKategoris,
+				totalAvailableBooks
 			});
 		} catch (error) {
 			console.error('Error loading more books:', error);
@@ -134,8 +131,6 @@
 			loading = false;
 		}
 	}
-
-	// Remove filterBooks function since we're using $derived
 
 	function calculateProgress(book: Book): number {
 		if (book.totalHalaman === 0) return 0;
@@ -169,7 +164,7 @@
 		if (cached) {
 			allLoadedBooks = cached.books || data.books;
 			books = allLoadedBooks;
-			// filteredBooks is now reactive, no need to call filterBooks()
+			totalAvailableBooks = cached.totalAvailableBooks || data.totalAvailableBooks;
 			// Use cached stats if available, but prefer fresh from SSR
 			if (cached.stats) {
 				animateCounters(
@@ -183,7 +178,8 @@
 			setCache({
 				books: data.books,
 				stats: data.stats,
-				availableKategoris
+				availableKategoris,
+				totalAvailableBooks
 			});
 		}
 
@@ -199,24 +195,7 @@
 			});
 			observer.observe(statsSection);
 		}
-
-		// Infinite scroll observer
-		const sentinel = document.querySelector('#load-more-sentinel');
-		if (sentinel) {
-			loadMoreObserver = new IntersectionObserver((entries) => {
-				if (entries[0].isIntersecting) {
-					loadMore();
-				}
-			});
-			loadMoreObserver.observe(sentinel);
-		}
-
-		return () => {
-			if (loadMoreObserver) loadMoreObserver.disconnect();
-		};
 	});
-
-	// Remove the $effect since filtering is now reactive with $derived
 </script>
 
 <SEO
@@ -315,6 +294,45 @@
 		</div>
 	</section>
 
+	<!-- Segera Terbit Section -->
+	{#if draftBooks.length > 0}
+		<section class="mb-12">
+			<div class="mb-6 flex items-center justify-between">
+				<h2 class="font-heading text-3xl font-bold text-[#29477B]">Segera Terbit</h2>
+				<div class="flex items-center gap-2 text-[#64463C]">
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+						></path>
+					</svg>
+					<span class="text-sm font-medium">{draftBooks.length} Buku</span>
+				</div>
+			</div>
+
+			<div class="relative">
+				<div class="scroll-wrapper -mx-6 overflow-x-auto px-6 pb-4">
+					<div class="flex gap-6" style="width: max-content;">
+						{#each draftBooks as book}
+							<div class="w-64 flex-shrink-0">
+								<div class="relative">
+									<div
+										class="absolute -top-2 -right-2 z-10 rounded-full bg-[#D4A856] px-3 py-1 text-xs font-semibold text-white shadow-lg"
+									>
+										Draft
+									</div>
+									<BookCard {book} />
+								</div>
+							</div>
+						{/each}
+					</div>
+				</div>
+			</div>
+		</section>
+	{/if}
+
 	<section class="mb-8">
 		<div class="flex flex-col items-center justify-between gap-4 md:flex-row">
 			<div class="flex w-full flex-col gap-4 sm:flex-row">
@@ -343,24 +361,59 @@
 	</section>
 
 	<section>
-		{#if loading}
-			<div class="py-4 text-center">Loading more books...</div>
-		{/if}
 		{#if filteredBooks.length > 0}
 			<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 				{#each filteredBooks as book}
 					<BookCard {book} />
 				{/each}
 			</div>
+
 			{#if hasMore}
-				<div id="load-more-sentinel" class="h-10"></div>
+				<div class="mt-8 flex justify-center">
+					<button
+						onclick={loadMore}
+						disabled={loading}
+						class="transform rounded-lg bg-[#29477B] px-8 py-3 font-semibold
+						text-white shadow-lg transition-all duration-300 hover:-translate-y-1
+						hover:bg-[#1e3658] hover:shadow-xl disabled:transform-none disabled:cursor-not-allowed
+						disabled:opacity-50 disabled:hover:bg-[#29477B]"
+					>
+						{#if loading}
+							<span class="flex items-center gap-2">
+								<svg
+									class="h-5 w-5 animate-spin"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+								>
+									<circle
+										class="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										stroke-width="4"
+									></circle>
+									<path
+										class="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+									></path>
+								</svg>
+								Memuat...
+							</span>
+						{:else}
+							Muat Lebih Banyak
+						{/if}
+					</button>
+				</div>
 			{/if}
 		{:else}
 			<div class="py-12 text-center">
 				<p class="text-lg text-[var(--muted-foreground)]">
 					{allLoadedBooks.length === 0
 						? 'Belum ada buku yang tersedia.'
-						: 'Tidak ada buku yang sesuai dengan filter. Coba muat lebih banyak buku.'}
+						: 'Tidak ada buku yang sesuai dengan filter.'}
 				</p>
 			</div>
 		{/if}

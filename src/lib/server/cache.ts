@@ -90,10 +90,11 @@ async function fetchFreshData(): Promise<CacheData> {
     const allBooksRes = await pb.collection('buku').getList(1, 1, { sort: '-created' });
     const totalBooks = allBooksRes.totalItems;
 
-    // Fetch all books
+    // Fetch all books (including Draft status)
     const allBukuRes = await pb.collection('buku').getFullList({
         sort: '-created',
         expand: 'penulis,penerbit,kategori'
+        // No filter - include all statuses (Draft and Terbit)
     });
 
     // Fetch all halaman
