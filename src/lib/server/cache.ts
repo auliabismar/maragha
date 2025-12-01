@@ -71,6 +71,99 @@ function readCache(): CacheData | null {
     }
 }
 
+// Fetch fresh data from PocketBase
+async function fetchFreshData(): Promise<CacheData> {
+    console.log('Fetching fresh data from PocketBase...');
+    try {
+        // Fetch all books with expanded relations
+        const allBukuRes = await pb.collection('buku').getFullList({
+            sort: '-created',
+            expand: 'sampul_href,penulis,penerbit,kategori'
+        });
+        console.log(`Fetched ${allBukuRes.length} books`);
+
+        // Fetch all pages
+        const allHalaman = await pb.collection('halaman').getFullList();
+        console.log(`Fetched ${allHalaman.length} pages`);
+
+        // Group pages by book for faster lookup
+        const halamanByBuku: Record<string, any[]> = {};
+        allHalaman.forEach((h: any) => {
+            if (h.buku) {
+                if (!halamanByBuku[h.buku]) {
+                    halamanByBuku[h.buku] = [];
+                }
+                halamanByBuku[h.buku].push(h);
+            }
+        });
+
+        const processedBooks: BookData[] = allBukuRes.map((record: any) => {
+            const bukuHalaman = halamanByBuku[record.id] || [];
+            const totalHalaman = bukuHalaman.length;
+            const halamanSetuju = bukuHalaman.filter((h: any) => h.status === 'Setuju').length;
+
+            let coverUrl = undefined;
+            // Handle cover from expanded sampul_href relation
+            if (record.expand?.sampul_href) {
+                const sampulRecord = record.expand.sampul_href;
+                // Try to find the file field dynamically by looking for common image extensions
+                const fileField = Object.keys(sampulRecord).find(key =>
+                    typeof sampulRecord[key] === 'string' &&
+                    /^[a-z0-9_]+\.(webp|jpg|jpeg|png|gif)$/i.test(sampulRecord[key])
+                );
+
+                if (fileField) {
+                    coverUrl = pb.files.getURL(sampulRecord, sampulRecord[fileField]);
+                }
+            }
+
+            // Fallback to direct cover field if no relation or relation has no file
+            if (!coverUrl && record.cover) {
+                coverUrl = pb.files.getURL(record, record.cover);
+            }
+
+            return {
+                id: record.id,
+                judul: record.judul,
+                cover: coverUrl,
+                status: record.status,
+                penulis: record.expand?.penulis?.map((p: any) => p.id) || [],
+                penerbit: record.expand?.penerbit?.id || 'N/A',
+                kategori: record.expand?.kategori?.map((k: any) => k.id) || [],
+                totalHalaman: totalHalaman,
+                halamanSetuju: halamanSetuju
+            };
+        });
+
+        // Global stats
+        const totalBooks = processedBooks.length;
+        const totalTranslatedPages = allHalaman.filter((h: any) => h.status === 'Setuju').length;
+
+        const allPenulis = processedBooks.flatMap(b => b.penulis);
+        const uniqueAuthors = new Set(allPenulis).size;
+
+        const allKategoriIds = processedBooks.flatMap(b => b.kategori);
+        const uniqueKategoriSet = new Set(allKategoriIds);
+        const availableKategoris = Array.from(uniqueKategoriSet).sort();
+
+        console.log('Data processing complete');
+
+        return {
+            books: processedBooks,
+            stats: {
+                totalBooks,
+                totalTranslatedPages,
+                uniqueAuthors
+            },
+            availableKategoris,
+            timestamp: Date.now()
+        };
+    } catch (error) {
+        console.error('Error fetching fresh data:', error);
+        throw error;
+    }
+}
+
 // Write cache to file
 function writeCache(data: CacheData) {
     try {
@@ -80,72 +173,6 @@ function writeCache(data: CacheData) {
     } catch (error) {
         console.error('Error writing cache:', error);
     }
-}
-
-// Fetch fresh data from PocketBase
-async function fetchFreshData(): Promise<CacheData> {
-    console.log('Fetching fresh data from PocketBase...');
-
-    // Get total books count
-    const allBooksRes = await pb.collection('buku').getList(1, 1, { sort: '-created' });
-    const totalBooks = allBooksRes.totalItems;
-
-    // Fetch all books (including Draft status)
-    const allBukuRes = await pb.collection('buku').getFullList({
-        sort: '-created',
-        expand: 'penulis,penerbit,kategori'
-        // No filter - include all statuses (Draft and Terbit)
-    });
-
-    // Fetch all halaman
-    const allHalaman = await pb.collection('halaman').getFullList();
-
-    // Group halaman by buku
-    const halamanByBuku = allHalaman.reduce((acc: { [key: string]: any[] }, h: any) => {
-        if (!acc[h.buku]) acc[h.buku] = [];
-        acc[h.buku].push(h);
-        return acc;
-    }, {});
-
-    // Process all books with computed halaman stats
-    const processedBooks = allBukuRes.map((record: any) => {
-        const bookHalaman = halamanByBuku[record.id] || [];
-        const halamanSetuju = bookHalaman.filter((h: any) => h.status === 'Setuju').length;
-        const totalHalaman = bookHalaman.length;
-
-        return {
-            id: record.id,
-            judul: record.judul,
-            cover: record.cover ? pb.files.getURL(record, record.cover) : undefined,
-            status: record.status,
-            penulis: record.expand?.penulis?.map((p: any) => p.id) || [],
-            penerbit: record.expand?.penerbit?.id || 'N/A',
-            kategori: record.expand?.kategori?.map((k: any) => k.id) || [],
-            totalHalaman: totalHalaman,
-            halamanSetuju: halamanSetuju
-        };
-    });
-
-    // Global stats
-    const totalTranslatedPages = allHalaman.filter((h: any) => h.status === 'Setuju').length;
-
-    const allPenulis = allBukuRes.flatMap((b: any) => b.expand?.penulis?.map((p: any) => p.id) || []);
-    const uniqueAuthors = new Set(allPenulis).size;
-
-    const allKategoriIds = allBukuRes.flatMap((b: any) => b.expand?.kategori?.map((k: any) => k.id) || []);
-    const uniqueKategoriSet = new Set(allKategoriIds);
-    const availableKategoris = Array.from(uniqueKategoriSet).sort();
-
-    return {
-        books: processedBooks,
-        stats: {
-            totalBooks,
-            totalTranslatedPages,
-            uniqueAuthors
-        },
-        availableKategoris,
-        timestamp: Date.now()
-    };
 }
 
 // Main function to get cached data

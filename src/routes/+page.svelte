@@ -69,7 +69,7 @@
 	// Get draft books for "Segera Terbit" section
 	let draftBooks = $derived(allLoadedBooks.filter((book) => book.status === 'Draft'));
 
-	const CACHE_KEY = 'maragha_home_data';
+	const CACHE_KEY = 'maragha_home_data_v3';
 	const CACHE_EXPIRY = 60 * 60 * 1000; // 1 hour
 
 	function getCache(): any | null {

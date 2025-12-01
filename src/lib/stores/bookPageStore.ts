@@ -42,7 +42,7 @@ const halamanCache = new Map<string, CacheEntry<Halaman[]>>();
 // Cache management functions
 function cleanOldCacheEntries(cache: Map<string, any>) {
 	if (cache.size <= MAX_CACHE_ENTRIES) return;
-	
+
 	const entries = Array.from(cache.entries());
 	entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
 	entries.slice(0, entries.length - MAX_CACHE_ENTRIES).forEach(([key]) => {
@@ -50,7 +50,7 @@ function cleanOldCacheEntries(cache: Map<string, any>) {
 	});
 }
 
-function checkCacheValidity<T>(entry: CacheEntry<T> | undefined, duration: number): boolean {
+function checkCacheValidity<T>(entry: CacheEntry<T> | undefined, duration: number): entry is CacheEntry<T> {
 	return !!(entry && (Date.now() - entry.timestamp) < duration);
 }
 
@@ -92,67 +92,43 @@ function loadImagePreference() {
 	showImages.set(showImagesValue);
 }
 
-export function toggleImages() {
-	showImages.update(value => {
-		const newValue = !value;
-		localStorage.setItem('showImages', newValue.toString());
-		return newValue;
-	});
-}
-
-async function fetchBook(bookId: string, forceRefresh = false) {
-	// Check cache first
+async function fetchBook(bookId: string) {
+	// Check cache
 	const cached = bookCache.get(bookId);
-	const cacheIsValid = checkCacheValidity(cached, BOOK_CACHE_DURATION);
-	
-	if (cacheIsValid && !forceRefresh) {
-		if (cached) {
-			book.set(cached.data);
-		}
+	if (checkCacheValidity(cached, BOOK_CACHE_DURATION)) {
+		book.set(cached.data);
 		return;
 	}
 
 	try {
-		const record = await pb.collection('buku').getOne(bookId, {
-			expand: 'penulis,penerbit,kategori'
-		});
-
+		const record = await pb.collection('buku').getOne(bookId);
 		const bookData: Book = {
 			id: record.id,
 			judul: record.judul,
 			cover: record.cover ? pb.files.getURL(record, record.cover) : undefined,
 			status: record.status,
-			penulis: record.expand?.penulis?.map((p: any) => p.id) || [],
-			penerbit: record.expand?.penerbit?.id || 'N/A',
-			kategori: record.expand?.kategori?.map((k: any) => k.id) || [],
-			screenshot: record.screenshot || false
+			penulis: record.penulis,
+			penerbit: record.penerbit,
+			kategori: record.kategori,
+			screenshot: record.screenshot
 		};
-		
-		// Update cache
+
 		bookCache.set(bookId, {
 			data: bookData,
 			timestamp: Date.now(),
 			bookId
 		});
-		
-		// Clean up old cache entries
 		cleanOldCacheEntries(bookCache);
-		
+
 		book.set(bookData);
 	} catch (error) {
 		console.error('Error fetching book:', error);
-		// Use stale cache as fallback
-		if (cached) {
-			book.set(cached.data);
-		} else {
-			goto('/');
-		}
+		toast.error('Gagal memuat data buku');
 	}
 }
 
 async function fetchHalaman(bookId: string, page?: number, itemsPerPage?: number, isPrefetch = false) {
-	// Abort previous request if any (only for non-prefetch requests)
-	if (!isPrefetch && abortController) {
+	if (abortController) {
 		abortController.abort();
 	}
 	abortController = new AbortController();
@@ -160,11 +136,11 @@ async function fetchHalaman(bookId: string, page?: number, itemsPerPage?: number
 	const currentPageValue = page || getCurrentPage();
 	const itemsPerPageValue = itemsPerPage || getItemsPerPage();
 	const cacheKey = `${bookId}-${currentPageValue}-${itemsPerPageValue}`;
-	
+
 	// Check cache first
 	const cached = halamanCache.get(cacheKey);
 	const cacheIsValid = checkCacheValidity(cached, PAGE_CACHE_DURATION);
-	
+
 	if (cacheIsValid && !isPrefetch && cached) {
 		halamanRecords.set(cached.data);
 		return;
@@ -194,7 +170,7 @@ async function fetchHalaman(bookId: string, page?: number, itemsPerPage?: number
 			timestamp: Date.now(),
 			bookId
 		});
-		
+
 		// Clean up old cache entries
 		cleanOldCacheEntries(halamanCache);
 
@@ -208,7 +184,7 @@ async function fetchHalaman(bookId: string, page?: number, itemsPerPage?: number
 			return;
 		}
 		console.error('Error fetching halaman:', error);
-		
+
 		// Use stale cache as fallback for non-prefetch requests
 		if (!isPrefetch && cached) {
 			halamanRecords.set(cached.data);
@@ -339,15 +315,15 @@ export function getPageNumbers(): (number | string)[] {
 // Make page numbers reactive using derived store
 export const pageNumbers = derived([currentPage, totalPages], ([$currentPage, $totalPages]) => {
 	const pages: (number | string)[] = [];
-	
+
 	// Handle simple cases
 	if ($totalPages <= 1) {
 		return [1];
 	}
-	
+
 	// Always show first page
 	pages.push(1);
-	
+
 	// Calculate key milestone pages
 	// X-2, X-1, X, X+1, X+2
 	const xMinus2 = Math.max(2, $currentPage - 2);
@@ -355,7 +331,7 @@ export const pageNumbers = derived([currentPage, totalPages], ([$currentPage, $t
 	const x = $currentPage;
 	const xPlus1 = Math.min($totalPages, $currentPage + 1);
 	const xPlus2 = Math.min($totalPages, $currentPage + 2);
-	
+
 	// Find biggest multiple of 10 before X-2 (only if current page is far enough from start)
 	let biggestMultipleBefore = 0;
 	if ($currentPage >= 15) {
@@ -364,7 +340,7 @@ export const pageNumbers = derived([currentPage, totalPages], ([$currentPage, $t
 			biggestMultipleBefore = 0; // Don't show if it's too small
 		}
 	}
-	
+
 	// Find least multiple of 10 after X+2 (only if current page is far enough from end)
 	let leastMultipleAfter = 0;
 	if (($totalPages - $currentPage) >= 15) {
@@ -373,13 +349,13 @@ export const pageNumbers = derived([currentPage, totalPages], ([$currentPage, $t
 			leastMultipleAfter = 0; // Don't show if it's beyond total pages
 		}
 	}
-	
+
 	// Add ellipsis and biggest multiple of 10 before X-2 (if meaningful)
 	if (biggestMultipleBefore > 1 && biggestMultipleBefore < xMinus2) {
 		pages.push('...');
 		pages.push(biggestMultipleBefore);
 	}
-	
+
 	// Add centered range around current page
 	// Show X-2 only if current page >= 4
 	if ($currentPage >= 4 && xMinus2 >= 2 && xMinus2 <= $totalPages) {
@@ -401,18 +377,18 @@ export const pageNumbers = derived([currentPage, totalPages], ([$currentPage, $t
 	if (($totalPages - $currentPage) >= 4 && xPlus2 >= 1 && xPlus2 <= $totalPages) {
 		pages.push(xPlus2);
 	}
-	
+
 	// Add ellipsis and least multiple of 10 after X+2 (if meaningful)
 	if (leastMultipleAfter > 0 && leastMultipleAfter > xPlus2 && leastMultipleAfter < $totalPages) {
 		pages.push('...');
 		pages.push(leastMultipleAfter);
 	}
-	
+
 	// Always show last page
 	if (!pages.includes($totalPages)) {
 		pages.push($totalPages);
 	}
-	
+
 	return pages;
 });
 
@@ -448,7 +424,7 @@ function getLemariRecord(): any {
 export async function refreshHalamanData(bookId: string, halamanId: string, forceRefresh = true) {
 	try {
 		const record = await pb.collection('halaman').getOne(halamanId);
-		
+
 		const updatedHalaman: Halaman = {
 			id: record.id,
 			halaman: record.halaman,
@@ -474,7 +450,7 @@ export async function refreshHalamanData(bookId: string, halamanId: string, forc
 		const itemsPerPageValue = getItemsPerPage();
 		const cacheKey = `${bookId}-${currentPageValue}-${itemsPerPageValue}`;
 		const cached = halamanCache.get(cacheKey);
-		
+
 		if (cached) {
 			const updatedCacheData = cached.data.map(halaman =>
 				halaman.id === halamanId ? updatedHalaman : halaman
@@ -502,14 +478,14 @@ export function cleanup() {
 export async function prefetchAdjacentPages(bookId: string) {
 	const currentPageValue = getCurrentPage();
 	const totalPagesValue = getTotalPages();
-	
+
 	// Prefetch next page
 	if (currentPageValue < totalPagesValue) {
 		setTimeout(() => {
 			fetchHalaman(bookId, currentPageValue + 1, getItemsPerPage(), true);
 		}, 100);
 	}
-	
+
 	// Prefetch previous page
 	if (currentPageValue > 1) {
 		setTimeout(() => {
@@ -548,14 +524,14 @@ export function getCacheStats() {
 		age: Date.now() - entry.timestamp,
 		dataSize: JSON.stringify(entry.data).length
 	}));
-	
+
 	const halamanCacheEntries = Array.from(halamanCache.entries()).map(([key, entry]) => ({
 		cacheKey: key,
 		bookId: entry.bookId,
 		age: Date.now() - entry.timestamp,
 		dataSize: JSON.stringify(entry.data).length
 	}));
-	
+
 	return {
 		bookCacheSize: bookCache.size,
 		halamanCacheSize: halamanCache.size,
