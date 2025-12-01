@@ -62,6 +62,14 @@ export const totalPages = writable(1);
 export const loading = writable(true);
 export const lemariRecord = writable<any>(null);
 export const showImages = writable(true);
+
+/**
+ * Toggle the visibility of images in the page view.
+ * This flips the boolean value of `showImages` store.
+ */
+export function toggleImages() {
+	showImages.update((v) => !v);
+}
 export const jumpPageInput = writable('');
 
 // Constants
