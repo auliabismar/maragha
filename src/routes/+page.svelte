@@ -323,7 +323,7 @@
 									>
 										Draft
 									</div>
-									<BookCard {book} priority={true} />
+									<BookCard {book} priority={true} displayMode="progress" />
 								</div>
 							</div>
 						{/each}
@@ -364,7 +364,7 @@
 		{#if filteredBooks.length > 0}
 			<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 				{#each filteredBooks as book, i}
-					<BookCard {book} priority={i < 4} />
+					<BookCard {book} priority={i < 4} displayMode="pages" />
 				{/each}
 			</div>
 

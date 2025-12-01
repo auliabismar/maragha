@@ -2,7 +2,11 @@
 	import { goto } from '$app/navigation';
 	import pb from '$lib/pocketbase';
 
-	let { book, priority = false }: { book: any; priority?: boolean } = $props();
+	let {
+		book,
+		priority = false,
+		displayMode = 'default'
+	}: { book: any; priority?: boolean; displayMode?: 'progress' | 'pages' | 'default' } = $props();
 
 	const handleClick = () => {
 		if (pb.authStore.isValid) {
@@ -56,7 +60,7 @@
 			</p>
 		{/if}
 
-		{#if book.status !== 'Draft'}
+		{#if displayMode === 'progress' || (displayMode === 'default' && book.status !== 'Draft')}
 			<!-- Progress Bar -->
 			<div class="mb-3">
 				<div class="mb-1 flex items-center justify-between">
@@ -75,6 +79,10 @@
 					{book.halamanSetuju} dari {book.totalHalaman} halaman
 				</p>
 			</div>
+		{:else if displayMode === 'pages'}
+			<p class="mb-3 text-sm text-[var(--muted-foreground)]">
+				{book.totalHalaman} Halaman
+			</p>
 		{/if}
 
 		<div class="flex items-center justify-between">
