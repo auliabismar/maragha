@@ -323,7 +323,7 @@
 									>
 										Draft
 									</div>
-									<BookCard {book} />
+									<BookCard {book} priority={true} />
 								</div>
 							</div>
 						{/each}
@@ -363,8 +363,8 @@
 	<section>
 		{#if filteredBooks.length > 0}
 			<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-				{#each filteredBooks as book}
-					<BookCard {book} />
+				{#each filteredBooks as book, i}
+					<BookCard {book} priority={i < 4} />
 				{/each}
 			</div>
 
