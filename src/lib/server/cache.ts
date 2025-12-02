@@ -103,23 +103,10 @@ async function fetchFreshData(): Promise<CacheData> {
             const halamanSetuju = bukuHalaman.filter((h: any) => h.status === 'Setuju').length;
 
             let coverUrl = undefined;
-            // Handle cover from expanded sampul_href relation
-            if (record.expand?.sampul_href) {
+            // Get cover from expanded sampul_href relation
+            if (record.expand?.sampul_href?.sampul) {
                 const sampulRecord = record.expand.sampul_href;
-                // Try to find the file field dynamically by looking for common image extensions
-                const fileField = Object.keys(sampulRecord).find(key =>
-                    typeof sampulRecord[key] === 'string' &&
-                    /^[a-z0-9_]+\.(webp|jpg|jpeg|png|gif)$/i.test(sampulRecord[key])
-                );
-
-                if (fileField) {
-                    coverUrl = pb.files.getURL(sampulRecord, sampulRecord[fileField]);
-                }
-            }
-
-            // Fallback to direct cover field if no relation or relation has no file
-            if (!coverUrl && record.cover) {
-                coverUrl = pb.files.getURL(record, record.cover);
+                coverUrl = pb.files.getURL(sampulRecord, sampulRecord.sampul);
             }
 
             const penulisNames = record.expand?.penulis?.map((p: any) => p.penulis) || [];
