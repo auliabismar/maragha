@@ -122,20 +122,23 @@ async function fetchFreshData(): Promise<CacheData> {
                 coverUrl = pb.files.getURL(record, record.cover);
             }
 
+            const penulisNames = record.expand?.penulis?.map((p: any) => p.penulis) || [];
+            const penerbitName = record.expand?.penerbit?.penerbit || '';
+            const kategoriNames = record.expand?.kategori?.map((k: any) => k.kategori) || [];
+
             return {
                 id: record.id,
                 judul: record.judul,
                 cover: coverUrl,
                 status: record.status,
-                penulis: record.expand?.penulis?.map((p: any) => p.id) || [],
-                penerbit: record.expand?.penerbit?.id || 'N/A',
-                kategori: record.expand?.kategori?.map((k: any) => k.id) || [],
-                totalHalaman: totalHalaman,
-                halamanSetuju: halamanSetuju
+                penulis: penulisNames,
+                penerbit: penerbitName,
+                kategori: kategoriNames,
+                totalHalaman,
+                halamanSetuju
             };
         });
 
-        // Global stats
         const totalBooks = processedBooks.length;
         const totalTranslatedPages = allHalaman.filter((h: any) => h.status === 'Setuju').length;
 

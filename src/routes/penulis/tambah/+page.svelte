@@ -26,61 +26,69 @@
 	<meta name="description" content="Buat penulis baru untuk perpustakaan digital Maragha" />
 </svelte:head>
 
-<div class="container mx-auto px-4 py-8 max-w-2xl">
-	<div class="bg-[var(--card)] dark:bg-[var(--card)] rounded-lg shadow-lg p-6 border border-[var(--border)]">
+<div class="container mx-auto max-w-2xl px-4 py-8">
+	<div
+		class="rounded-lg border border-[var(--border)] bg-[var(--card)] p-6 shadow-lg dark:bg-[var(--card)]"
+	>
 		<div class="mb-6">
-			<h1 class="text-3xl font-bold text-[var(--foreground)] mb-2">Tambah Penulis Baru</h1>
+			<h1 class="mb-2 text-3xl font-bold text-[var(--foreground)]">Tambah Penulis Baru</h1>
 			<p class="text-[var(--muted-foreground)]">
 				Buat penulis baru untuk perpustakaan digital Maragha
 			</p>
 		</div>
 
 		{#if error}
-			<div class="mb-4 p-4 bg-[var(--destructive)]/5 dark:bg-[var(--destructive)]/10 border border-[var(--destructive)]/20 rounded-md">
+			<div
+				class="mb-4 rounded-md border border-[var(--destructive)]/20 bg-[var(--destructive)]/5 p-4 dark:bg-[var(--destructive)]/10"
+			>
 				<p class="text-[var(--destructive-foreground)]">{error}</p>
 			</div>
 		{/if}
 
-		<form method="POST" use:enhance={() => {
-			isSubmitting = true;
-			error = null;
-			return async ({ result }) => {
-				isSubmitting = false;
-				if (result?.type === 'success') {
-					await goto('/penulis');
-				} else if (result?.type === 'error') {
-					error = result.error?.message || 'Terjadi kesalahan';
-				} else if (result?.type === 'failure' && result.data?.error) {
-					error = String(result.data.error);
-				}
-			};
-		}} class="space-y-6">
-			<!-- ID Penulis -->
+		<form
+			method="POST"
+			use:enhance={() => {
+				isSubmitting = true;
+				error = null;
+				return async ({ result }) => {
+					isSubmitting = false;
+					if (result?.type === 'success') {
+						await goto('/penulis');
+					} else if (result?.type === 'error') {
+						error = result.error?.message || 'Terjadi kesalahan';
+					} else if (result?.type === 'failure' && result.data?.error) {
+						error = String(result.data.error);
+					}
+				};
+			}}
+			class="space-y-6"
+		>
+			<!-- Nama Penulis -->
 			<div>
-				<label for="id" class="block text-sm font-medium text-[var(--foreground)] mb-2">
-					ID Penulis <span class="text-[var(--destructive)]">*</span>
+				<label for="penulis" class="mb-2 block text-sm font-medium text-[var(--foreground)]">
+					Nama Penulis <span class="text-[var(--destructive)]">*</span>
 				</label>
 				<input
-					id="id"
-					name="id"
+					id="penulis"
+					name="penulis"
 					type="text"
-					class="w-full px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--background)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-[var(--ring)] dark:bg-[var(--card)]"
-					placeholder="Masukkan ID penulis"
+					class="w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-[var(--foreground)] focus:border-[var(--ring)] focus:ring-2 focus:ring-[var(--ring)] focus:outline-none dark:bg-[var(--card)]"
+					placeholder="Masukkan nama penulis"
 					required
 					maxlength="255"
 				/>
 			</div>
 
 			<!-- Form Actions -->
-			<div class="flex flex-col sm:flex-row gap-3 pt-4">
+			<div class="flex flex-col gap-3 pt-4 sm:flex-row">
 				<button
 					type="submit"
 					disabled={isSubmitting}
-					class="flex-1 bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-[var(--primary-foreground)] font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+					class="flex-1 rounded-md bg-[var(--primary)] px-4 py-2 font-medium text-[var(--primary-foreground)] transition-colors hover:bg-[var(--primary)]/90 focus:ring-2 focus:ring-[var(--ring)] focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 				>
 					{#if isSubmitting}
 						<span class="flex items-center justify-center">
-							<svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
+							<svg class="mr-2 -ml-1 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
 								<circle
 									class="opacity-25"
 									cx="12"
@@ -106,7 +114,7 @@
 					type="button"
 					on:click={() => goto('/penulis')}
 					disabled={isSubmitting}
-					class="flex-1 bg-[var(--muted)] hover:bg-[var(--muted)]/90 text-[var(--muted-foreground)] font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+					class="flex-1 rounded-md bg-[var(--muted)] px-4 py-2 font-medium text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)]/90 focus:ring-2 focus:ring-[var(--ring)] focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 				>
 					Batal
 				</button>
@@ -118,7 +126,7 @@
 	<div class="mt-8 text-center">
 		<a
 			href="/penulis"
-			class="inline-flex items-center text-[var(--primary)] hover:text-[var(--primary)]/80 dark:text-[var(--primary)] dark:hover:text-[var(--primary)]/80 text-sm font-medium transition-colors"
+			class="inline-flex items-center text-sm font-medium text-[var(--primary)] transition-colors hover:text-[var(--primary)]/80 dark:text-[var(--primary)] dark:hover:text-[var(--primary)]/80"
 		>
 			← Kembali ke Daftar Penulis
 		</a>

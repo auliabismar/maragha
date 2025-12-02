@@ -5,18 +5,19 @@ import { getAuthenticatedPb } from '$lib/pocketbase';
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
 		const formData = await request.formData();
-		const id = formData.get('id') as string;
+		const penerbit = formData.get('penerbit') as string;
 
-		if (!id || !id.trim()) {
+		if (!penerbit || !penerbit.trim()) {
 			return {
 				success: false,
-				error: 'ID penerbit wajib diisi'
+				error: 'Nama penerbit wajib diisi'
 			};
 		}
+
 		try {
 			const authenticatedPb = await getAuthenticatedPb(cookies);
 			await authenticatedPb.collection('penerbit').create({
-				"id": id.trim()
+				penerbit: penerbit.trim()
 			});
 
 			return redirect(303, '/penerbit');
@@ -25,13 +26,14 @@ export const actions: Actions = {
 
 			if (err.status === 400) {
 				const validationErrors = err.data || {};
-				if (validationErrors.id) {
+				if (validationErrors.penerbit) {
 					return {
 						success: false,
-						error: String(validationErrors.id.message)
+						error: String(validationErrors.penerbit.message)
 					};
 				}
 			}
+
 			return {
 				success: false,
 				error: String(err.message || 'Gagal membuat penerbit. Silakan coba lagi.')

@@ -174,7 +174,7 @@
 					{#if book.expand?.penerbit}
 						<div class="text-right">
 							<p class="text-sm text-[var(--primary-foreground)] opacity-80">Penerbit:</p>
-							<p class="font-medium">{book.expand.penerbit.id}</p>
+							<p class="font-medium">{book.expand.penerbit.penerbit}</p>
 						</div>
 					{/if}
 				</div>
@@ -219,7 +219,7 @@
 									<span
 										class="inline-block rounded-full border border-[var(--primary)]/20 bg-[var(--primary)]/10 px-3 py-1 text-sm text-[var(--primary)] dark:bg-[var(--primary)]/20"
 									>
-										{author.id}
+										{author.penulis}
 									</span>
 								{/each}
 							</div>
@@ -235,7 +235,7 @@
 									<span
 										class="inline-block rounded-full border border-[var(--accent)]/20 bg-[var(--accent)]/10 px-3 py-1 text-sm text-[var(--accent-foreground)] dark:bg-[var(--accent)]/20"
 									>
-										{category.id}
+										{category.kategori}
 									</span>
 								{/each}
 							</div>
@@ -308,7 +308,7 @@
 									>
 										<option value={null}>Pilih Penerbit</option>
 										{#each publishers as publisher}
-											<option value={publisher.id}>{publisher.id}</option>
+											<option value={publisher.id}>{publisher.penerbit}</option>
 										{/each}
 									</select>
 								</div>
@@ -329,7 +329,7 @@
 													class="h-4 w-4 rounded text-[var(--primary)] focus:ring-[var(--primary)]"
 												/>
 												<div>
-													<div class="font-medium text-[var(--foreground)]">{author.id}</div>
+													<div class="font-medium text-[var(--foreground)]">{author.penulis}</div>
 													<div class="text-sm text-[var(--muted-foreground)]">{author.email}</div>
 												</div>
 											</label>
@@ -353,7 +353,9 @@
 													class="h-4 w-4 rounded text-[var(--primary)] focus:ring-[var(--primary)]"
 												/>
 												<div>
-													<div class="font-medium text-[var(--foreground)]">{category.id}</div>
+													<div class="font-medium text-[var(--foreground)]">
+														{category.kategori}
+													</div>
 												</div>
 											</label>
 										{/each}

@@ -6,9 +6,7 @@
 	let { data } = $props();
 	let { penerbit, user } = data;
 
-	const columns = [
-		{ key: 'id', label: 'Penerbit', sortable: true }
-	];
+	const columns = [{ key: 'penerbit', label: 'Penerbit', sortable: true }];
 
 	onMount(() => {
 		if (!user || user.akses !== 'Editor') {

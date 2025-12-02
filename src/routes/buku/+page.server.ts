@@ -19,10 +19,19 @@ export const load: PageServerLoad = async ({ locals, parent, cookies }) => {
 			};
 		}
 		const records = await queryPb.collection('buku').getFullList({
-			sort: '-created'
+			sort: '-created',
+			expand: 'penerbit,penulis,kategori'
 		});
+
+		const processedRecords = records.map((record: any) => ({
+			...record,
+			penerbit: record.expand?.penerbit?.penerbit || 'N/A',
+			penulis: record.expand?.penulis?.map((p: any) => p.penulis).join(', ') || '',
+			kategori: record.expand?.kategori?.map((k: any) => k.kategori).join(', ') || ''
+		}));
+
 		return {
-			buku: records,
+			buku: processedRecords,
 			user
 		};
 	} catch (error) {

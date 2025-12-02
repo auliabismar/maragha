@@ -5,19 +5,19 @@ import { getAuthenticatedPb } from '$lib/pocketbase';
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
 		const formData = await request.formData();
-		const id = formData.get('id') as string;
+		const kategori = formData.get('kategori') as string;
 
-		if (!id || !id.trim()) {
+		if (!kategori || !kategori.trim()) {
 			return {
 				success: false,
-				error: 'ID kategori wajib diisi'
+				error: 'Nama kategori wajib diisi'
 			};
 		}
 
 		try {
 			const authenticatedPb = await getAuthenticatedPb(cookies);
 			await authenticatedPb.collection('kategori').create({
-				id: id.trim()
+				kategori: kategori.trim()
 			});
 
 			return redirect(303, '/kategori');
@@ -26,10 +26,10 @@ export const actions: Actions = {
 
 			if (err.status === 400) {
 				const validationErrors = err.data || {};
-				if (validationErrors.id) {
+				if (validationErrors.kategori) {
 					return {
 						success: false,
-						error: String(validationErrors.id.message)
+						error: String(validationErrors.kategori.message)
 					};
 				}
 			}

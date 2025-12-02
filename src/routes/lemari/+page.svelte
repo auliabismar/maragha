@@ -128,9 +128,9 @@
 						judul: bookRecord.judul,
 						cover: coverUrl,
 						status: bookRecord.status,
-						penulis: bookRecord.expand?.penulis?.map((p: any) => p.id) || [],
-						penerbit: bookRecord.expand?.penerbit?.id || 'N/A',
-						kategori: bookRecord.expand?.kategori?.map((k: any) => k.id) || []
+						penulis: bookRecord.expand?.penulis?.map((p: any) => p.penulis) || [],
+						penerbit: bookRecord.expand?.penerbit?.penerbit || 'N/A',
+						kategori: bookRecord.expand?.kategori?.map((k: any) => k.kategori) || []
 					}
 				};
 			});
